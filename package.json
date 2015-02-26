@@ -1,0 +1,17 @@
+{
+    "name": "chatroom",
+    "version": "0.0.1",
+    "private": true,
+    "scripts": {
+        "start": "node app.js"
+    },
+    "dependencies": {
+        "express": "3.5.0",
+        "ejs": "*",
+        "mongodb": "*",
+        "connect-mongo":"*",
+        "connect-flash" :"*",
+        "markdown":"*",
+		"connect":"< 2.6.0"
+    }
+}

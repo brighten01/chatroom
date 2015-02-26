@@ -12,14 +12,14 @@
     <script language="javascript">
         var socket = io.connect("127.0.0.1:1337");
         var html = "";
-
+        var room_id = "<%= room_id%>";
         function createhtml(message) {
             html += '<div class="list-group-item message"> '+message.user+' : ' + message.content;
             html += '</div>';
             $(".messages").html(html);
         }
 
-        function createhtml2(messages) {
+        function createhtml2(messages)  {
                for(var i in messages){
                   html += '<div class="list-group-item message"> '+messages[i].user+' : ' + messages[i].content;
                   html += '</div>';
@@ -46,7 +46,8 @@
                         var message = {
                             content:value,
                             user: username,
-                            time : new Date().getTime()
+                            time : new Date().getTime() ,
+                            room_id: "<%= room_id%>"
                         };
                         if (value) {
                             socket.emit("createMessage", message);
@@ -58,19 +59,45 @@
                     }
                 }
             });
+            //用户登录房间
 
+            socket.emit("login room",{
+                username:"<% if (user){%><%= user.username%><%}else{ %> <% } %>",
+                time: new Date().getTime(),
+                room_id: "<%= room_id%>"
+            });
+
+
+           // 当用户登录房间
+           socket.on("login user",function (data){
+                console.log("welcome user "+data.message);
+           });
+            socket.on("connected",function (data){
+                alert(data.message);
+            });
             socket.on("messageAdded", function (message) {
                 createhtml(message);
             });
 
-            socket.emit('getAllMessages');
+            socket.on("onlineuser",function(data){
+                console.log(data.data);
+            });
+            socket.emit('getAllMessages',{room_id:"<%= room_id%>"});
+            //登录房间
+            socket.emit("setroom",{room_id:room_id});
+
             socket.on('allMessages',function (messages){
                 createhtml2(messages);
-            })
+            });
+
+            $("#logout").click(function (){
+                socket.emit("leave room",{username:"<% if (user){%><%= user.username%><%}else{ %> <% } %>"});
+                location.href="/logout";
+            });
         });
     </script>
 </head>
-<body >
+<body>
 
 <nav class="collapse navbar-collapse" role="navigation">
     <!--<li>-->
@@ -87,10 +114,10 @@
                <li>
                 <% if (user){ %>
                     <a class="navbar-brand"><span>欢迎回来</span> <span><%= user.username%></span></a>
-                     <a class="navbar-brand" href="/logout">退出</a>
+                     <a class="navbar-brand"  style="cursor:pointer" id="logout">退出</a>
                 <%}else{%>
-                       <a class="navbar-brand">登录</a>
-                       <a class="navbar-brand">注册</a>
+                       <a class="navbar-brand" href="/login">登录</a>
+                       <a class="navbar-brand" href="register">注册</a>
                 <% } %>
                </li>
             </ul>
@@ -99,6 +126,9 @@
     </div>
 </div>
 <div class="container" style="margin-top:100px">
+    <% if (room) {%>
+    <h5>您正在房间 ： <%= room%></h5>
+    <%}%>
     <div class="col-md-12">
         <div class="pannel pannle-defaut room">
             <div class="pannel-heading room-header">TechNode</div>

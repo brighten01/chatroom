@@ -1,17 +1,19 @@
 var User = require("../models/user");
 var crypto = require("crypto");
+var Room = require("../models/room");
 module.exports = function (app) {
     /**
      * 验证登录
      */
     app.get("/",checkLogin);
     app.get("/",function (req , res){
-        res.render('message', {
-            user : req.session.user,
-            title: "聊天室首页",
-            error: req.flash("error").toString(),
-            success: req.flash("success").toString()
-        });
+        res.redirect("/roomlist");
+        //res.render('message', {
+        //    user : req.session.user,
+        //    title: "聊天室首页",
+        //    error: req.flash("error").toString(),
+        //    success: req.flash("success").toString()
+        //});
     });
 
     /**
@@ -74,7 +76,7 @@ module.exports = function (app) {
                     }
                     req.flash("success","注册成功");
                     req.session.user = user;
-                    return res.redirect("/");
+                    return res.redirect("/roomlist");
                 });
             }
         });
@@ -111,9 +113,9 @@ module.exports = function (app) {
             }
             //console.log('登录后信息');
             //console.log(user);
-            req.session.user= user;
+            req.session.user = user;
             req.flash("success","登录成功");
-            res.redirect("/message");
+            res.redirect("/roomlist");
         });
     });
 
@@ -126,13 +128,111 @@ module.exports = function (app) {
     });
 
     /**
+     * 进入某个房间页面 并且判断是否登录
+     */
+    app.get("/room/:name",checkLogin);
+    app.get("/room/:name",function(req,res){
+        var name = req.params.name;
+        var room_id = 0;
+        var newRoom = new Room(name);
+        Room.getOne(name,function (error,room){
+            if(error){
+                req.flash("error","发生错误");
+            }
+            room_id = room.room_id;
+            if(room){
+                res.render("message",{
+                    title:"房间"+name,
+                    error:req.flash("error").toString(),
+                    success:req.flash("success").toString(),
+                    user:req.session.user,
+                    room:name,
+                    room_id : room_id
+                });
+            }else{
+                //否则跳转
+                req.flash("error","您请求的房间不存在");
+                return res.redirect("/");
+            }
+        });
+
+    });
+
+    /**
+     * 添加房间
+     */
+    app.get("/addroom",checkLogin);
+    app.get("/addroom",function (req,res){
+        res.render("addroom",{
+            title:"添加房间",
+            user:req.session.user,
+            success:req.flash("success").toString(),
+            error:req.flash("error").toString()
+        });
+    });
+
+    /**
+     * 添加房间
+     */
+    app.post("/addroom",checkLogin);
+    app.post("/addroom",function (req,res){
+        var name = req.body.name;
+        var room_id  =req.body.room_id;
+        var newRoom = new Room(name,room_id);
+
+        Room.getOne(name,function (error,room){
+            console.log("房间信息");
+            if(room){
+                req.flash("error","房间名已经存在");
+                return res.redirect('back');
+            }
+
+            newRoom.save(function (error,room){
+                if(error){
+                    console.log("error",error);
+                    req.flash("error","请求错误"+error);
+                    return res.redirect("/addroom");
+                }
+                req.flash("sucess","添加成功");
+                res.redirect("/roomlist");
+            });
+
+        });
+    });
+
+
+    /**
+     * 房间列表
+     */
+    app.get("/roomlist",checkLogin);
+    app.get("/roomlist",function (req,res){
+
+        Room.getList(function (error,roomlist){
+            if(error){
+                req.flash("error","房间列表载入出错"+error);
+            }
+            var rooms = null;
+            if(roomlist){
+                rooms = roomlist;
+            }
+            res.render("roomlist",{
+                title:"房间里列表",
+                user:req.session.user,
+                error:req.flash("error").toString(),
+                success:req.flash("success").toString(),
+                roomlist:rooms
+            });
+        });
+    });
+
+    /**
      * 未登录判断
      * @param req
      * @param res
      * @param next
      */
     function checkLogin(req,res,next){
-        if(!req.session.user){
+        if(!req.session.user) {
             res.redirect("/login");
         }
         next();
@@ -150,4 +250,6 @@ module.exports = function (app) {
         }
         next();
     }
+
+
 }
