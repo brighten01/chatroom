@@ -53,14 +53,14 @@
                             socket.emit("createMessage", message);
                             value = "";
                             socket.on('error',function (data){
-                                console.log(data);
+                               // console.log(data);
                             });
                         }
                     }
                 }
             });
-            //用户登录房间
 
+            //用户登录房间
             socket.emit("login room",{
                 username:"<% if (user){%><%= user.username%><%}else{ %> <% } %>",
                 time: new Date().getTime(),
@@ -94,6 +94,11 @@
                 socket.emit("leave room",{username:"<% if (user){%><%= user.username%><%}else{ %> <% } %>"});
                 location.href="/logout";
             });
+
+            socket.on("user_online_detail",function(data){
+                console.log("在线用户");
+                console.log(data);
+            })
         });
     </script>
 </head>

@@ -14,6 +14,10 @@ Info.prototype.save=function (){
  * @param value
  */
 Info.prototype.del=function(data ,value){
+
+    if(data==undefined){
+        data = new Array();
+    }
     var length =  data.length;
     var index= 0;
     if(value==null || data.length==0) return ;

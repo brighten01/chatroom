@@ -13,9 +13,9 @@ User.prototype.save = function (callback) {
     mongodb.close();
 
     var user = {
-        username:this.username,
-        password:this.password,
-        email:this.email
+        username: this.username,
+        password: this.password,
+        email: this.email
     };
     mongodb.open(function (error, db) {
         if (error) {
@@ -26,8 +26,7 @@ User.prototype.save = function (callback) {
             if (error) {
                 callback(error);
             }
-           collection.insert(user
-               , {safe: true}, function (error, user) {
+            collection.insert(user, {safe: true}, function (error, user) {
                     if (error) {
                         return callback(error);
                     }
@@ -54,8 +53,6 @@ User.getOne = function (username, callback) {
                 if (error) {
                     return callback(error);
                 }
-                //console.log("返回用户信息");
-                //console.log(user);
                 callback(null, user);
             });
         });
@@ -63,25 +60,28 @@ User.getOne = function (username, callback) {
 }
 /**
  * 获取在线的用户
- * @param username
  * @param callback
  */
-User.getOnline = function (username, callback) {
+User.getOnline = function (callback) {
     mongodb.close();
     mongodb.open(function (error, db) {
+
         if (error) {
             mongodb.close();
             return callback(error);
         }
-        db.collection("online_user", function (error, collection) {
-            collection.find({}, function (error, users) {
-                if (error) {
+
+        db.collection("users", function (error, collection) {
+          //  console.log(collection);
+            collection.find({online: 1}).sort({"time":-1}).toArray(function (error,userlist){
+                if(error){
                     return callback(error);
                 }
-                callback(null, users);
+                callback(null ,userlist);
             });
         });
     });
+
 }
 
 /**
@@ -92,14 +92,39 @@ User.getOnline = function (username, callback) {
 User.deleteOnline = function (username, callback) {
     mongodb.close();
     mongodb.open(function (error, db) {
-        db.collection("online_user", function (error, collection) {
-            collection.remove({username: username}, function (error) {
-                if (error) {
-                    callback(error);
+        db.collection("users", function (error, collection) {
+            collection.update({"username": username}, {$set: {"online": "0"}}, function (error, doc) {
+                if(error){
+                    return callback(error);
                 }
-                callback(null);
+                callback(null,doc);
             });
         });
     });
 }
+
+/**
+ * 更新在线状态
+ * @param username
+ * @param callback
+ */
+User.updateOnline = function (username, callback) {
+    mongodb.close();
+    mongodb.open(function (error, db) {
+        if (error) {
+            callback(error);
+            mongodb.close();
+        }
+        console.log("更新用户"+username);
+        db.collection("users", function (error, collection) {
+            collection.update({"username": username}, {$set:{"online":1}}, function (error, doc) {
+                if(error){
+                    return callback(error);
+                }
+                callback(null,doc);
+            });
+        });
+    });
+}
+
 module.exports = User;

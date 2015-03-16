@@ -35,10 +35,10 @@ app.set("views",path.join(__dirname,'views'));
 app.use(express.static(path.join(__dirname,"public")));
 var io = require("socket.io").listen(app.listen(port));
 // 设置socket.io 认证信息存储session
+var users  = require("./models/user.js");
 
 var messages = [];
 var onlinUser = [];
-
 io.sockets.on("connection",function (socket) {
 
     socket.on("getAllMessages",function (data){
@@ -73,21 +73,55 @@ io.sockets.on("connection",function (socket) {
      * 登录房间
      */
     socket.on("login room",function(data){
+
         // 推送在线用户
+        socket.join(data.room_id);
         var flag =false ;
-        if(onlinUser.length > 0){
+
+        if(onlinUser.length > 0) {
            flag =  checkdata.find(onlinUser,data.username);
             if(flag == false ) {
                 onlinUser.push(data.username);
                 io.sockets.in(data.room_id).emit("login user",{message:"welcome "+ data.username+" 进入房间 "});
+
+                users.updateOnline(data.username,function (error,userinfo){
+                    if(error){
+                        console.log(error);
+                        return false;
+                    }
+
+                    //更新完毕后取得用户信息
+                    users.getOnline(function (error,online_users){
+                        if(error){
+                            console.log(error);
+                            return false;
+                        }
+                        io.sockets.in(data.room_id).emit("user_online_detail",{data:online_users});
+                    });
+                });
                 io.sockets.in(data.room_id).emit("onlineuser",{data:onlinUser});
             }
-
-        }else{
+        }else if(onlinUser==undefined || onlinUser.length==0) {
             onlinUser.push(data.username);
             io.sockets.in(data.room_id).emit("login user",{message:"welcome "+ data.username+" 进入房间 "});
+            users.updateOnline(data.username,function (error,userinfo){
+                if(error){
+                    console.log(error);
+                    return false;
+                }
+
+                //更新完毕后取得用户信息
+                users.getOnline(function (error,online_users){
+                    if(error){
+                        console.log(error);
+                        return false;
+                    }
+                    io.sockets.in(data.room_id).emit("user_online_detail",{data:online_users});
+                });
+            });
             io.sockets.in(data.room_id).emit("onlineuser",{data:onlinUser});
         }
+
 
     });
 });
