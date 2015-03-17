@@ -4,6 +4,7 @@ function User(user) {
     this.email = user.email;
     this.password = user.password;
     this.username = user.username;
+    this.avatar = user.avatar;
 }
 /**
  * 保存用户数据
@@ -15,7 +16,8 @@ User.prototype.save = function (callback) {
     var user = {
         username: this.username,
         password: this.password,
-        email: this.email
+        email: this.email,
+        avatar : this.avatar
     };
     mongodb.open(function (error, db) {
         if (error) {

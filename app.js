@@ -19,6 +19,8 @@ app.use(flash());
 app.engine('.html', require('ejs').__express);
 app.set('view engine', 'html');
 app.use(express.json());
+app.use(express.bodyParser({uploadDir:path.join(__dirname,'public/uploadfiles')}));
+//app.use(express.bodyParser());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
 app.use(express.cookieParser());
@@ -76,22 +78,29 @@ io.sockets.on("connection",function (socket) {
 
         // 推送在线用户
         socket.join(data.room_id);
-        var flag =false ;
+
+        users.getOnline(function (error,online_users){
+            if(error) {
+                console.log(error);
+                return false;
+            }
+
+            io.sockets.in(data.room_id).emit("user_online_detail",{data:online_users});
+        });
 
         if(onlinUser.length > 0) {
-           flag =  checkdata.find(onlinUser,data.username);
+          var   flag =  checkdata.find(onlinUser,data.username);
             if(flag == false ) {
                 onlinUser.push(data.username);
                 io.sockets.in(data.room_id).emit("login user",{message:"welcome "+ data.username+" 进入房间 "});
-
                 users.updateOnline(data.username,function (error,userinfo){
                     if(error){
                         console.log(error);
                         return false;
                     }
-
                     //更新完毕后取得用户信息
                     users.getOnline(function (error,online_users){
+                        console.log("update on line");
                         if(error){
                             console.log(error);
                             return false;
@@ -102,6 +111,7 @@ io.sockets.on("connection",function (socket) {
                 io.sockets.in(data.room_id).emit("onlineuser",{data:onlinUser});
             }
         }else if(onlinUser==undefined || onlinUser.length==0) {
+
             onlinUser.push(data.username);
             io.sockets.in(data.room_id).emit("login user",{message:"welcome "+ data.username+" 进入房间 "});
             users.updateOnline(data.username,function (error,userinfo){
@@ -120,10 +130,24 @@ io.sockets.on("connection",function (socket) {
                 });
             });
             io.sockets.in(data.room_id).emit("onlineuser",{data:onlinUser});
+        }else{
+            console.log("流程");
         }
-
-
     });
+
+
+    //加入某个用户的会话
+    var userMessages= [];
+    socket.on("join user",function (data){
+        socket.join(data.meetingid);
+        socket.on("user send",function (message) {
+            // 给用户发消息
+            console.log("用户信息");
+            console.log(message);
+            io.sockets.in(data.meetingid).emit("user messgae send",message);
+        });
+
+    })
 });
 
 routes(app);

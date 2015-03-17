@@ -14,20 +14,36 @@
         var html = "";
         var room_id = "<%= room_id%>";
         function createhtml(message) {
-            html += '<div class="list-group-item message"> '+message.user+' : ' + message.content;
+            html += '<div class="list-group-item message"> ' + message.user + ' : ' + message.content;
             html += '</div>';
             $(".messages").html(html);
         }
 
-        function createhtml2(messages)  {
-               for(var i in messages){
-                  html += '<div class="list-group-item message"> '+messages[i].user+' : ' + messages[i].content;
-                  html += '</div>';
-                  $(".messages").html(html);
-               }
+        function create_user_message(message){
+            var message = message.message;
+            html += '<div class="list-group-item message"> ' + message.user + ' : ' + message.content;
+            html += '</div>';
+            $(".dialog").html(html);
+        }
+
+        function createhtml2(messages) {
+            for (var i in messages) {
+                html += '<div class="list-group-item message"> ' + messages[i].user + ' : ' + messages[i].content;
+                html += '</div>';
+                $(".messages").html(html);
+            }
+        }
+
+        function showModalDialog(json) {
+            //创建窗体并且加入会话
+            socket.emit("join user",{meetingid:json._id});
+            //设置聊天窗体
+            $("#avatar").attr("src",json.avatar);
+            $("#chatto_user").html(json.username);
+            $("#myModal").modal();
         }
         var ctrlDown = false;
-        var messages ;
+        var messages;
         $(document).ready(function () {
             $(".message-input").bind("keydown", function (event) {
                 if (event.keyCode === 17) {
@@ -44,61 +60,91 @@
                         var value = $(".message-input").val();
                         $(".message-input").val('');
                         var message = {
-                            content:value,
+                            content: value,
                             user: username,
-                            time : new Date().getTime() ,
+                            time: new Date().getTime(),
                             room_id: "<%= room_id%>"
                         };
                         if (value) {
                             socket.emit("createMessage", message);
                             value = "";
-                            socket.on('error',function (data){
-                               // console.log(data);
+                            socket.on('error', function (data) {
+                                // console.log(data);
                             });
                         }
                     }
                 }
             });
 
+            //单独用户窗口发送消息
+            $(".sendmessage").click(function (){
+                var message = {
+                    content: $("#usercontent").val(),
+                    user: "<% if (user){%><%= user.username%><%}else{ %> <% } %>",
+                    time: new Date().getTime(),
+                    room_id: "<%= room_id%>"
+                };
+
+                socket.emit("user send",{message:message});
+                $("#usercontent").val('');
+            });
+
+            socket.on("user messgae send",function (message){
+                create_user_message(message);
+            });
             //用户登录房间
-            socket.emit("login room",{
-                username:"<% if (user){%><%= user.username%><%}else{ %> <% } %>",
+            socket.emit("login room", {
+                username: "<% if (user){%><%= user.username%><%}else{ %> <% } %>",
                 time: new Date().getTime(),
                 room_id: "<%= room_id%>"
             });
 
 
-           // 当用户登录房间
-           socket.on("login user",function (data){
-                console.log("welcome user "+data.message);
-           });
-            socket.on("connected",function (data){
+            // 当用户登录房间
+            socket.on("login user", function (data) {
+                console.log("welcome user " + data.message);
+            });
+            socket.on("connected", function (data) {
                 alert(data.message);
             });
             socket.on("messageAdded", function (message) {
                 createhtml(message);
             });
 
-            socket.on("onlineuser",function(data){
+            socket.on("onlineuser", function (data) {
                 console.log(data.data);
             });
-            socket.emit('getAllMessages',{room_id:"<%= room_id%>"});
+            socket.emit('getAllMessages', {room_id: "<%= room_id%>"});
             //登录房间
-            socket.emit("setroom",{room_id:room_id});
+            socket.emit("setroom", {room_id: room_id});
 
-            socket.on('allMessages',function (messages){
+            socket.on('allMessages', function (messages) {
                 createhtml2(messages);
             });
 
-            $("#logout").click(function (){
-                socket.emit("leave room",{username:"<% if (user){%><%= user.username%><%}else{ %> <% } %>"});
-                location.href="/logout";
+
+            $("#logout").click(function () {
+                socket.emit("leave room", {username: "<% if (user){%><%= user.username%><%}else{ %> <% } %>"});
+                location.href = "/logout";
             });
 
-            socket.on("user_online_detail",function(data){
-                console.log("在线用户");
-                console.log(data);
-            })
+
+            // 在线用户
+            socket.on("user_online_detail", function (data) {
+                var userdata = data.data;
+
+                var html = "";
+                for (var i = 0; i < userdata.length; i++) {
+                    if (userdata[i].avatar == "" || userdata[i].avatar == undefined) {
+                        userdata[i].avatar = "/images/none.png";
+                    }
+                    var namedata = new Object();
+                    namedata = JSON.stringify(userdata[i]);
+                    html += "<li><a class='showdialog' style='cursor: pointer' onclick='javascript:showModalDialog("+namedata+");'><img src='" + userdata[i].avatar + "' width='20' height='20'>&nbsp;" + userdata[i].username + "</a></span></li>";
+                }
+                $(".userlist").html(html);
+            });
+
         });
     </script>
 </head>
@@ -106,25 +152,25 @@
 
 <nav class="collapse navbar-collapse" role="navigation">
     <!--<li>-->
-        <!--<img src="{{me.avatarUrl}}" title="{{me.name}}" class="img-rounded">-->
+    <!--<img src="{{me.avatarUrl}}" title="{{me.name}}" class="img-rounded">-->
     <!--</li>-->
     <!--<li href="" ng-click="logout()"><a style="font-color:white">Log Out</a></li>-->
 </nav>
 <div class="nav navbar-inverse navbar-fixed-top">
     <div class="container">
         <div class="navar header">
-            <a class="navbar-brand">TechNode</a>
+            <a class="navbar-brand">欢迎进入，<%= room%></a>
             <ul class="nav navbar-nav navbar-right hidden-sm">
 
-               <li>
-                <% if (user){ %>
+                <li>
+                    <% if (user){ %>
                     <a class="navbar-brand"><span>欢迎回来</span> <span><%= user.username%></span></a>
-                     <a class="navbar-brand"  style="cursor:pointer" id="logout">退出</a>
-                <%}else{%>
-                       <a class="navbar-brand" href="/login">登录</a>
-                       <a class="navbar-brand" href="register">注册</a>
-                <% } %>
-               </li>
+                    <a class="navbar-brand" style="cursor:pointer" id="logout">退出</a>
+                    <%}else{%>
+                    <a class="navbar-brand" href="/login">登录</a>
+                    <a class="navbar-brand" href="register">注册</a>
+                    <% } %>
+                </li>
             </ul>
         </div>
 
@@ -135,20 +181,58 @@
     <h5>您正在房间 ： <%= room%></h5>
     <%}%>
     <div class="col-md-12">
-        <div class="pannel pannle-defaut room">
-            <div class="pannel-heading room-header">TechNode</div>
-            <div class="pannel body room-content">
-                <div class="list-group messages">
-                    <div class="list-group-item message">
+        <div class="col-md-9">
+            <div class="pannel pannle-defaut room">
+                <div class="pannel-heading room-header"><h5>系统公告</h5>
+                    <marquee>请遵守国家相关法律，文明发言</marquee>
+                </div>
+                <div class="pannel body room-content">
+                    <div class="list-group messages">
+                        <div class="list-group-item message">
+                        </div>
                     </div>
                 </div>
+                <form class="message-creator" ng-controller="MessageCreatorCtrl">
+                    <div class="form-group">
+                        <textarea required class="form-control message-input" placeorder="Ctrl Enter to quick send">
+                        </textarea>
+                    </div>
+                </form>
             </div>
-            <form class="message-creator" ng-controller="MessageCreatorCtrl">
-                <div class="form-group">
-                    <textarea required class="form-control message-input" placeorder="Ctrl Enter to quick send">
-                    </textarea>
+        </div>
+
+        <div class="col-md-3" style="float:right;width:250px;">
+            <div class="list-group-item">
+                <ul><h5><b>在线用户</b></h5></ul>
+                <ul class="nav bs-docs-sidenav userlist">
+                </ul>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span><img id="avatar" width="50" height="50" /><a id="chatto_user" style="margin-left: 20px;"></a></span>
                 </div>
-            </form>
+                <div class="modal-body">
+                    <div class="pannel body room-content" >
+                        <div class="list-group user_message" >
+                            <div class="list-group-item dialog" style="height: 300px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="form-group">
+                        <textarea id="usercontent" class="form-control"></textarea>
+                    </div>
+                    <button type="button" class="btn  btn-primary btn-sm" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn  btn-primary btn-sm sendmessage">发送</button>
+                </div>
+            </div>
         </div>
     </div>
 </div>

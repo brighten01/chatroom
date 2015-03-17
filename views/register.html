@@ -9,7 +9,39 @@
     <script language="javascript" src="/javascript/jquery.js"></script>
     <script language="javascript" src="/javascript/bootstrap.js"></script>
     <script language="javascript" src="/socket.io/socket.io.js"></script>
-    </head>
+    <script language="javascript" src="/javascript/ajaxuploadfile.js"></script>
+    <script language="javascript">
+
+        $(function(){
+            var btnUpload=$('#uploadimg');
+            new AjaxUpload(btnUpload, {
+                action: '/uploadfile',
+                name: 'uploadfile',
+                onSubmit: function(file, ext) {
+                    if (! (ext && /^(jpg|png|jpeg|gif)$/.test(ext))) {
+                        window.parent.errortext();
+                        return false;
+                    }
+
+                },
+
+                onComplete: function(file, response) {
+                    console.log(response);
+                    eval("var t="+response);
+                    var targetFile = t.targetFile.toString();
+                    if(response.error!=null){
+                        alert("上传错误"+response.error);
+                    }else{
+                        // 渲染页面
+                        $("#new_img_path").attr("src",targetFile);
+                        $("#fileUrl").val(targetFile);
+                    }
+                }
+            });
+
+        });
+    </script>
+</head>
 <body>
 
 <div class="nav navbar-inverse navbar-fixed-top">
@@ -19,9 +51,10 @@
         </div>
     </div>
 </div>
-    <div class="container" style="margin-top: 100px;">
-        <div class="col-md-12">
-            <form  method="post" class="form-horizontal">
+<div class="container" style="margin-top: 100px;">
+    <img src="/images/favicon.ico">
+    <div class="col-md-12">
+        <form method="post" class="form-horizontal">
             <table class="table table-hovered">
                 <tr>
                     <td colspan="3">用户注册</td>
@@ -45,7 +78,7 @@
 
                 <tr>
                     <td>
-                       确认密码
+                        确认密码
                     </td>
                     <td>
                         <input type="password" value="" name="confirm_password">
@@ -61,14 +94,25 @@
                     </td>
                 </tr>
                 <tr>
+
+                    <td>上传图片</td>
                     <td>
+                        <input type="file" id="uploadimg">
+                        <input type="hidden" value="" name="avatar" id="fileUrl" >
+                        <img src="" id="new_img_path" width="100" height="100">
+                    </td>
+
+                </tr>
+                <tr>
+                    <td colspan="5">
                         <button class="btn btn-primary" type="submit">登录</button>
                     </td>
                 </tr>
+
             </table>
-            </form>
-        </div>
+        </form>
     </div>
+</div>
 
 
 </body>
