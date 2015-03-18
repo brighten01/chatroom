@@ -1,5 +1,10 @@
 1. 进入目录
-直接运行 node app.js  当然也可以使用 pm2 管理你的应用
+直接运行 node app.js  当然也可以使用 pm2 管理你的应用,在运行前需要启动mongodb 服务
+启动服务命令行windows 下
+
+首先进入mongod 所在目录 
+
+mongod --dbpath=d:\mongodata  (可以自己定义路径)
 
 基本功能：
 
