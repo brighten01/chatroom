@@ -144,13 +144,15 @@ module.exports = function (app) {
             }
             room_id = room.room_id;
             if (room) {
+                console.log(req.session.user._id);
                 res.render("message", {
                     title: "房间" + name,
                     error: req.flash("error").toString(),
                     success: req.flash("success").toString(),
                     user: req.session.user,
                     room: name,
-                    room_id: room_id
+                    room_id: room_id,
+                    user_id: req.session.user._id
                 });
             } else {
                 //否则跳转

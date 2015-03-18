@@ -10,9 +10,11 @@
     <script language="javascript" src="/javascript/bootstrap.js"></script>
     <script language="javascript" src="/socket.io/socket.io.js"></script>
     <script language="javascript">
+        var user_id = "<%= user_id%>";
         var socket = io.connect("127.0.0.1:1337");
         var html = "";
         var room_id = "<%= room_id%>";
+        var to_user ="";
         function createhtml(message) {
             html += '<div class="list-group-item message"> ' + message.user + ' : ' + message.content;
             html += '</div>';
@@ -35,9 +37,8 @@
         }
 
         function showModalDialog(json) {
-            //创建窗体并且加入会话
-            socket.emit("join user",{meetingid:json._id});
-            //设置聊天窗体
+
+            to_user = json.username;
             $("#avatar").attr("src",json.avatar);
             $("#chatto_user").html(json.username);
             $("#myModal").modal();
@@ -69,7 +70,7 @@
                             socket.emit("createMessage", message);
                             value = "";
                             socket.on('error', function (data) {
-                                // console.log(data);
+                                
                             });
                         }
                     }
@@ -82,21 +83,30 @@
                     content: $("#usercontent").val(),
                     user: "<% if (user){%><%= user.username%><%}else{ %> <% } %>",
                     time: new Date().getTime(),
-                    room_id: "<%= room_id%>"
+                    room_id: "<%= room_id%>",
+                    to_user:to_user,
+                    from_user: "<% if (user){%><%= user.username%><%}else{ %> <% } %>"
                 };
 
-                socket.emit("user send",{message:message});
+                socket.emit("sayto",{message:message});
                 $("#usercontent").val('');
             });
 
-            socket.on("user messgae send",function (message){
-                create_user_message(message);
+            /**
+             * 接受单聊信息
+             */
+            socket.on("say",function (data){
+                console.log(data);
+                create_user_message(data.message);
             });
+
+
             //用户登录房间
             socket.emit("login room", {
                 username: "<% if (user){%><%= user.username%><%}else{ %> <% } %>",
                 time: new Date().getTime(),
                 room_id: "<%= room_id%>"
+
             });
 
 
