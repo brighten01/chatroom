@@ -12,10 +12,10 @@
     <script language="javascript">
         var user_id = "<%= user_id%>";
         var socket = io.connect("127.0.0.1:1337");
-        var html = "";
         var room_id = "<%= room_id%>";
         var to_user ="";
         function createhtml(message) {
+            var html = "";
             html += '<div class="list-group-item message"> ' + message.user + ' : ' + message.content;
             html += '</div>';
             $(".messages").html(html);
@@ -77,6 +77,13 @@
                 }
             });
 
+            // 系统消息
+
+            socket.on("system message",function (data){
+                var message = data.message;
+                $("#system_message").html(message);
+
+            });
             //单独用户窗口发送消息
             $(".sendmessage").click(function (){
                 var message = {
@@ -132,12 +139,10 @@
                 createhtml2(messages);
             });
 
-
             $("#logout").click(function () {
                 socket.emit("leave room", {username: "<% if (user){%><%= user.username%><%}else{ %> <% } %>"});
                 location.href = "/logout";
             });
-
 
             // 在线用户
             socket.on("user_online_detail", function (data) {
@@ -175,10 +180,11 @@
                 <li>
                     <% if (user){ %>
                     <a class="navbar-brand"><span>欢迎回来</span> <span><%= user.username%></span></a>
+                    <a class="navbar-brand" href="/system_message"> 系统消息</a>
                     <a class="navbar-brand" style="cursor:pointer" id="logout">退出</a>
                     <%}else{%>
                     <a class="navbar-brand" href="/login">登录</a>
-                    <a class="navbar-brand" href="register">注册</a>
+                    <a class="navbar-brand" href="/register">注册</a>
                     <% } %>
                 </li>
             </ul>
@@ -193,8 +199,9 @@
     <div class="col-md-12">
         <div class="col-md-9">
             <div class="pannel pannle-defaut room">
-                <div class="pannel-heading room-header"><h5>系统公告</h5>
-                    <marquee>请遵守国家相关法律，文明发言</marquee>
+                <div class="pannel-heading room-header">
+                    <h5>系统公告</h5>
+                    <marquee><span id="system_message">请遵守国家相关法律，文明发言</span></marquee>
                 </div>
                 <div class="pannel body room-content">
                     <div class="list-group messages">

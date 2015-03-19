@@ -1,0 +1,78 @@
+<html>
+<head>
+    <title></title>
+
+    <link rel="stylesheet" href="/stylesheets/bootstrap.css"/>
+    <link rel="stylesheet" href="/stylesheets/bootstrap-theme.min.css"/>
+    <script language="JavaScript" src="/javascript/jquery.js"></script>
+    <script language="JavaScript" src="/javascript/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="nav navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navar header">
+            <a class="navbar-brand">TechNode</a>
+            <ul class="nav navbar-nav navbar-right hidden-sm">
+
+                <li>
+                    <% if (user){ %>
+                    <a class="navbar-brand"><span>欢迎回来</span> <span><%= user.username%></span></a>
+                    <a class="navbar-brand" href="/logout">退出</a>
+                    <%}else{%>
+                    <a class="navbar-brand">登录</a>
+                    <a class="navbar-brand">注册</a>
+                    <% } %>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+</div>
+
+<div class="container">
+    <% if(error) {%>
+    <%= error%>
+    <%}else {%>
+    <%= success%>
+    <%}%>
+</div>
+<div class="container" style="margin-top:100px;width:50%;">
+    <div class="navar header">
+
+        <ul class="nav navbar-nav navbar-right hidden-sm">
+
+            <li>
+
+            </li>
+        </ul>
+    </div>
+
+    <form class="form-horizontal" method="post" action="">
+        <table class="table table-hover">
+            <tr>
+                <td colspan="3">系统公告</td>
+            </tr>
+            <tr>
+                <td>选择房间发送</td>
+                <td colspan="3">
+                    <select name="roomlist">
+                        <option value="">选择房间发送</option>
+                        <%roomlist.forEach(function(rooms,index){%>
+                        <option value=""> <%= rooms.name%></option>
+                        <%});%>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3"><textarea  name="content" class="form-control"></textarea></td>
+            </tr>
+            <tr>
+                <td>
+                    <button class="btn btn-primary">发送消息</button>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+</body>
+</html>

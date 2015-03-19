@@ -10,8 +10,8 @@
     <script language="javascript" src="/javascript/bootstrap.js"></script>
     <script language="javascript" src="/socket.io/socket.io.js"></script>
     <script language="javascript" src="/javascript/ajaxuploadfile.js"></script>
-    <script language="javascript">
 
+    <script language="javascript">
         $(function(){
             var btnUpload=$('#uploadimg');
             new AjaxUpload(btnUpload, {
@@ -22,9 +22,7 @@
                         window.parent.errortext();
                         return false;
                     }
-
                 },
-
                 onComplete: function(file, response) {
                     console.log(response);
                     eval("var t="+response);
@@ -101,7 +99,6 @@
                         <input type="hidden" value="" name="avatar" id="fileUrl" >
                         <img src="" id="new_img_path" width="100" height="100">
                     </td>
-
                 </tr>
                 <tr>
                     <td colspan="5">
@@ -113,7 +110,5 @@
         </form>
     </div>
 </div>
-
-
 </body>
 </html>

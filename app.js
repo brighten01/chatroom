@@ -30,6 +30,7 @@ app.use(express.session({
     cookie: {maxAge: 1000 * 60 * 60 * 24 * 30},
     store: sessionStore
 }));
+var system_message = require("./models/message.js");
 
 var port = process.env.DEFAULT_PORT || 1337;
 app.use(app.router);
@@ -42,6 +43,7 @@ var users = require("./models/user.js");
 var messages = [];
 var onlinUser = [];
 var clients = []; //根据用户区别不同的socket 客户端
+var room_message = [];
 io.sockets.on("connection", function (socket) {
 
     socket.on("getAllMessages", function (data) {
@@ -49,6 +51,15 @@ io.sockets.on("connection", function (socket) {
         socket.emit("allMessages", messages);
     });
 
+    /**
+     * 发送系统消息
+     */
+    system_message.select(function (error,message){
+        if(message){
+            room_message[message._id] =socket;
+        }
+        room_message[message._id].emit("system message",{message:message.content});
+    });
     /**
      * 设置房间
      */
@@ -69,6 +80,12 @@ io.sockets.on("connection", function (socket) {
      */
     socket.on('leave room', function (data) {
         onlinUser = checkdata.del(onlinUser, data.username);
+        users.deleteOnline(data.username,function (error,result){
+            if(error){
+                console.log("更新失败,error="+error);
+            }
+
+        });
         io.sockets.in(data.room_id).emit("onlineuser", {users: onlinUser});
     });
 
@@ -102,7 +119,6 @@ io.sockets.on("connection", function (socket) {
                     }
                     //更新完毕后取得用户信息
                     users.getOnline(function (error, online_users) {
-                        console.log("update on line");
                         if (error) {
                             console.log(error);
                             return false;

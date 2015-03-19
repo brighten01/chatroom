@@ -2,6 +2,7 @@ var User = require("../models/user");
 var crypto = require("crypto");
 var Room = require("../models/room");
 var file = require("../models/file.js");
+var Message = require("../models/message.js");
 module.exports = function (app) {
     /**
      * 验证登录
@@ -9,12 +10,6 @@ module.exports = function (app) {
     app.get("/", checkLogin);
     app.get("/", function (req, res) {
         res.redirect("/roomlist");
-        //res.render('message', {
-        //    user : req.session.user,
-        //    title: "聊天室首页",
-        //    error: req.flash("error").toString(),
-        //    success: req.flash("success").toString()
-        //});
     });
 
     /**
@@ -232,6 +227,7 @@ module.exports = function (app) {
     /**
      * 上传文件
      */
+    app.get("/uploadfile", checkLogin);
     app.post("/uploadfile", function (req, res) {
         var tmpFile = req.files.uploadfile.path;
         var year = new Date().getFullYear();
@@ -260,6 +256,47 @@ module.exports = function (app) {
 
     });
 
+    /**
+     * 发送系统消息
+     */
+    app.get("/system_message", checkLogin);
+
+    app.get("/system_message",function(req , res) {
+        Room.getList(function (error,roomlist){
+             res.render("system_message",{
+                user:req.session.user,
+                title: "发送系统消息",
+                success:req.flash("success").toString(),
+                error:req.flash("error").toString(),
+                roomlist:roomlist
+            });
+        });
+    });
+
+    /**
+     * 发送系统消息
+     */
+    app.get("/system_message", checkLogin);
+    app.post("/system_message",function (req,res){
+        var content = req.body.content;
+        var roomid = req.body.roomlist;
+        if(roomid==null){
+            roomid=0;
+        }
+        var new_message= new Message({
+            content : content,
+            room_id :roomid
+        });
+
+        new_message.save(function (error,doc){
+            if(error){
+                req.flash("error","发送系统消息失败");
+                return res.redirect("/");
+            }
+            req.flash("success","发送系统消息成功");
+            res.redirect("/system_message");
+        });
+    });
     /**
      * 未登录判断
      * @param req

@@ -12,7 +12,6 @@ function User(user) {
  */
 User.prototype.save = function (callback) {
     mongodb.close();
-
     var user = {
         username: this.username,
         password: this.password,
@@ -95,7 +94,7 @@ User.deleteOnline = function (username, callback) {
     mongodb.close();
     mongodb.open(function (error, db) {
         db.collection("users", function (error, collection) {
-            collection.update({"username": username}, {$set: {"online": "0"}}, function (error, doc) {
+            collection.update({"username": username}, {$set: {"online": 0}}, function (error, doc) {
                 if(error){
                     return callback(error);
                 }
@@ -117,7 +116,6 @@ User.updateOnline = function (username, callback) {
             callback(error);
             mongodb.close();
         }
-        console.log("更新用户"+username);
         db.collection("users", function (error, collection) {
             collection.update({"username": username}, {$set:{"online":1}}, function (error, doc) {
                 if(error){
