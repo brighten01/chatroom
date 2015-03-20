@@ -5,7 +5,19 @@
     <link rel="stylesheet" href="/stylesheets/bootstrap.css"/>
     <link rel="stylesheet" href="/stylesheets/bootstrap-theme.min.css"/>
     <script language="JavaScript" src="/javascript/jquery.js"></script>
-    <script language="JavaScript" src="/javascript/bootstrap.min.js"></script>
+    <script language="JavaScript" src="/javascript/bootstrap.min.js"></script> <script language="javascript" src="/socket.io/socket.io.js"></script>
+    <script language="javascript">
+
+        var socket = io.connect("127.0.0.1:1337");
+        $(document).ready(function (){
+            $("#send").click(function (){
+                var room_id = $("#roomlist").val();
+                var data = {message:$("#content").val(),roomid:room_id};
+                socket.emit("show system message",data);
+                $("#sys").submit();
+            });
+        });
+    </script>
 </head>
 <body>
 <div class="nav navbar-inverse navbar-fixed-top">
@@ -47,7 +59,7 @@
         </ul>
     </div>
 
-    <form class="form-horizontal" method="post" action="">
+    <form class="form-horizontal" method="post" action="" id="sys">
         <table class="table table-hover">
             <tr>
                 <td colspan="3">系统公告</td>
@@ -55,20 +67,20 @@
             <tr>
                 <td>选择房间发送</td>
                 <td colspan="3">
-                    <select name="roomlist">
+                    <select name="roomlist" id="roomlist">
                         <option value="">选择房间发送</option>
                         <%roomlist.forEach(function(rooms,index){%>
-                        <option value=""> <%= rooms.name%></option>
+                        <option value="<%= rooms.room_id%>"> <%= rooms.name%></option>
                         <%});%>
                     </select>
                 </td>
             </tr>
             <tr>
-                <td colspan="3"><textarea  name="content" class="form-control"></textarea></td>
+                <td colspan="3"><textarea  id="content" name="content" class="form-control"></textarea></td>
             </tr>
             <tr>
                 <td>
-                    <button class="btn btn-primary">发送消息</button>
+                    <button class="btn btn-primary" id="send" type="button">发送消息</button>
                 </td>
             </tr>
         </table>

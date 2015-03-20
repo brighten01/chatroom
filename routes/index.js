@@ -9,6 +9,9 @@ module.exports = function (app) {
      */
     app.get("/", checkLogin);
     app.get("/", function (req, res) {
+        if(!req.session.user){
+            return res.redirect("/login");
+        }
         res.redirect("/roomlist");
     });
 

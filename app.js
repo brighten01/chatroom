@@ -58,8 +58,21 @@ io.sockets.on("connection", function (socket) {
         if (message != null) {
             room_message[message._id] = socket;
             room_message[message._id].emit("system message", {message: message.content});
+            //清空数组
+            delete room_message[message._id];
         }
     });
+
+    socket.on("show system message",function(data){
+       if(data.roomid!=''){
+           socket.join(data.roomid);
+           io.sockets.in(data.roomid).emit("system message",{message:data.message});
+           socket.leave(data.roomid);
+        }else{
+           console.log(data);
+           socket.emit("system message",{message:data.message});
+       }
+   });
     /**
      * 设置房间
      */
@@ -88,9 +101,6 @@ io.sockets.on("connection", function (socket) {
                 console.log(error);
                 return false;
             }
-            //更新完毕后取得用户信息
-            console.log("在线信息");
-            console.log(online_users);
             io.sockets.in(data.room_id).emit("user_online_detail", {data: online_users});
         });
         io.sockets.in(data.room_id).emit("onlineuser", {data: onlinUser});
@@ -100,7 +110,7 @@ io.sockets.on("connection", function (socket) {
      * 登录房间
      */
     socket.on("login room", function (data) {
-
+        console.log(data.username+"登入");
         // 推送在线用户
         socket.join(data.room_id);
         clients[data.username] = socket;

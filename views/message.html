@@ -80,8 +80,9 @@
 
             socket.on("system message",function (data){
                 var message = data.message;
+                console.log("接收消息");
+                console.log(message);
                 $("#system_message").html(message);
-
             });
             //单独用户窗口发送消息
             $(".sendmessage").click(function (){
