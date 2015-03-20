@@ -92,13 +92,18 @@ User.getOnline = function (callback) {
  */
 User.deleteOnline = function (username, callback) {
     mongodb.close();
+    var _self= this;
     mongodb.open(function (error, db) {
         db.collection("users", function (error, collection) {
             collection.update({"username": username}, {$set: {"online": 0}}, function (error, doc) {
                 if(error){
                     return callback(error);
                 }
-                callback(null,doc);
+                //直接取得线上人数
+                _self.getOnline(function(error,online_users){
+                    callback(null,online_users);
+                });
+
             });
         });
     });
@@ -111,6 +116,7 @@ User.deleteOnline = function (username, callback) {
  */
 User.updateOnline = function (username, callback) {
     mongodb.close();
+    var _self = this;
     mongodb.open(function (error, db) {
         if (error) {
             callback(error);
@@ -121,7 +127,11 @@ User.updateOnline = function (username, callback) {
                 if(error){
                     return callback(error);
                 }
-                callback(null,doc);
+                _self.getOnline(function(error,onlin_users){
+                   return callback(null,onlin_users);
+                });
+                //callback(null,doc);
+
             });
         });
     });

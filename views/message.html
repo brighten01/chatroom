@@ -20,12 +20,12 @@
             html += '</div>';
             $(".messages").html(html);
         }
-
+        var userhtml="";
         function create_user_message(message){
             var message = message.message;
-            html += '<div class="list-group-item message"> ' + message.user + ' : ' + message.content;
-            html += '</div>';
-            $(".dialog").html(html);
+            userhtml += '<div class="list-group-item message"> ' + message.user + ' : ' + message.content;
+            userhtml += '</div>';
+            $(".dialog").html(userhtml);
         }
 
         function createhtml2(messages) {
@@ -37,7 +37,6 @@
         }
 
         function showModalDialog(json) {
-
             to_user = json.username;
             $("#avatar").attr("src",json.avatar);
             $("#chatto_user").html(json.username);
@@ -129,7 +128,9 @@
             });
 
             socket.on("onlineuser", function (data) {
+                //此处处理users;
                 console.log(data.data);
+
             });
             socket.emit('getAllMessages', {room_id: "<%= room_id%>"});
             //登录房间
@@ -139,14 +140,23 @@
                 createhtml2(messages);
             });
 
+            socket.on("exist user",function(data){
+                //userdata
+                if(data!==null ||data.length!=0 || data!==undefined ){
+                    for(var i=0;i<data.length;i++){
+
+                    }
+                }
+            });
+
             $("#logout").click(function () {
-                socket.emit("leave room", {username: "<% if (user){%><%= user.username%><%}else{ %> <% } %>"});
+                socket.emit("leave room", {username: "<% if (user){%><%= user.username%><%}else{ %> <% } %>",room_id:room_id});
                 location.href = "/logout";
             });
 
             // 在线用户
             socket.on("user_online_detail", function (data) {
-                var userdata = data.data;
+                var  userdata = data.data;
 
                 var html = "";
                 for (var i = 0; i < userdata.length; i++) {

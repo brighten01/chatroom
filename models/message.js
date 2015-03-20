@@ -81,6 +81,10 @@ Message.select = function (callback) {
                     callback(error);
                     return false;
                 }
+                if(doc==null){
+                    callback(true,null);
+                    return ;
+                }
                 callback(null, doc);
             });
         });

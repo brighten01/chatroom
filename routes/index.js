@@ -139,7 +139,7 @@ module.exports = function (app) {
             }
             room_id = room.room_id;
             if (room) {
-                console.log(req.session.user._id);
+                //console.log(req.session.user);
                 res.render("message", {
                     title: "房间" + name,
                     error: req.flash("error").toString(),
@@ -322,6 +322,5 @@ module.exports = function (app) {
         }
         next();
     }
-
 
 }

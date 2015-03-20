@@ -54,11 +54,11 @@ io.sockets.on("connection", function (socket) {
     /**
      * 发送系统消息
      */
-    system_message.select(function (error,message){
-        if(message){
-            room_message[message._id] =socket;
+    system_message.select(function (error, message) {
+        if (message != null) {
+            room_message[message._id] = socket;
+            room_message[message._id].emit("system message", {message: message.content});
         }
-        room_message[message._id].emit("system message",{message:message.content});
     });
     /**
      * 设置房间
@@ -79,14 +79,21 @@ io.sockets.on("connection", function (socket) {
      *  离开房间
      */
     socket.on('leave room', function (data) {
-        onlinUser = checkdata.del(onlinUser, data.username);
-        users.deleteOnline(data.username,function (error,result){
-            if(error){
-                console.log("更新失败,error="+error);
+        //onlinUser = checkdata.del(onlinUser, data.username);
+        socket.join(data.room_id);
+        onlinUser.splice(onlinUser.indexOf(data.username), 1);
+        //延迟发送
+        users.deleteOnline(data.username, function (error, online_users) {
+            if (error) {
+                console.log(error);
+                return false;
             }
-
+            //更新完毕后取得用户信息
+            console.log("在线信息");
+            console.log(online_users);
+            io.sockets.in(data.room_id).emit("user_online_detail", {data: online_users});
         });
-        io.sockets.in(data.room_id).emit("onlineuser", {users: onlinUser});
+        io.sockets.in(data.room_id).emit("onlineuser", {data: onlinUser});
     });
 
     /**
@@ -108,39 +115,10 @@ io.sockets.on("connection", function (socket) {
 
         if (onlinUser.length > 0) {
             var flag = checkdata.find(onlinUser, data.username);
-
             if (flag == false) {
                 onlinUser.push(data.username);
                 io.sockets.in(data.room_id).emit("login user", {message: "welcome " + data.username + " 进入房间 "});
-                users.updateOnline(data.username, function (error, userinfo) {
-                    if (error) {
-                        console.log(error);
-                        return false;
-                    }
-                    //更新完毕后取得用户信息
-                    users.getOnline(function (error, online_users) {
-                        if (error) {
-                            console.log(error);
-                            return false;
-                        }
-                        io.sockets.in(data.room_id).emit("user_online_detail", {data: online_users});
-                    });
-                });
-                io.sockets.in(data.room_id).emit("onlineuser", {data: onlinUser});
-            }
-        } else if (onlinUser == undefined || onlinUser.length == 0) {
-
-            onlinUser.push(data.username);
-
-            io.sockets.in(data.room_id).emit("login user", {message: "welcome " + data.username + " 进入房间 "});
-            users.updateOnline(data.username, function (error, userinfo) {
-                if (error) {
-                    console.log(error);
-                    return false;
-                }
-
-                //更新完毕后取得用户信息
-                users.getOnline(function (error, online_users) {
+                users.updateOnline(data.username, function (error, online_users) {
                     if (error) {
                         console.log(error);
                         return false;
@@ -148,18 +126,37 @@ io.sockets.on("connection", function (socket) {
 
                     io.sockets.in(data.room_id).emit("user_online_detail", {data: online_users});
                 });
-            });
+
+            }
             io.sockets.in(data.room_id).emit("onlineuser", {data: onlinUser});
+        } else if (onlinUser == undefined || onlinUser.length == 0) {
+            onlinUser.push(data.username);
+            io.sockets.in(data.room_id).emit("onlineuser", {data: onlinUser});
+            io.sockets.in(data.room_id).emit("login user", {message: "welcome " + data.username + " 进入房间 "});
+            users.updateOnline(data.username, function (error, online_users) {
+                if (error) {
+                    console.log(error);
+                    return false;
+                }
+                io.sockets.in(data.room_id).emit("user_online_detail", {data: online_users});
+            });
+
         }
     });
 
     //私聊
 
     socket.on("sayto", function (data) {
+        socket.join(data.room_id);
         var from_user = data.message.from_user;
         var to_user = data.message.to_user;
-        clients[from_user].emit("say",{message:data});
-        clients[to_user].emit("say",{message:data});
+
+        setTimeout(function () {
+            clients[from_user].emit("say", {message: data});
+            clients[to_user].emit("say", {message: data});
+        }, 100);
+
+
     })
 });
 
