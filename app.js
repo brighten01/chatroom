@@ -31,7 +31,6 @@ app.use(express.session({
     store: sessionStore
 }));
 var system_message = require("./models/message.js");
-
 var port = process.env.DEFAULT_PORT || 1337;
 app.use(app.router);
 app.set("views", path.join(__dirname, 'views'));

@@ -6,6 +6,7 @@
     <title>聊天室</title>
     <link rel="stylesheet" href="/stylesheets/bootstrap-theme.css"/>
     <link rel="stylesheet" href="/stylesheets/bootstrap.css"/>
+    <link rel="stylesheet" href="/stylesheets/flat-ui.css" />
     <script language="javascript" src="/javascript/jquery.js"></script>
     <script language="javascript" src="/javascript/bootstrap.js"></script>
     <script language="javascript" src="/socket.io/socket.io.js"></script>
@@ -14,24 +15,24 @@
         var socket = io.connect("127.0.0.1:1337");
         var room_id = "<%= room_id%>";
         var to_user ="";
+        var html ="";
         function createhtml(message) {
-            var html = "";
+
             html += '<div class="list-group-item message"> ' + message.user + ' : ' + message.content;
-            html += '</div>';
+            html+= '</div>';
             $(".messages").html(html);
         }
         var userhtml="";
         function create_user_message(message){
             var message = message.message;
-            userhtml += '<div class="list-group-item message"> ' + message.user + ' : ' + message.content;
-            userhtml += '</div>';
+            userhtml +=  message.user + ' : ' + message.content;
             $(".dialog").html(userhtml);
         }
 
         function createhtml2(messages) {
             for (var i in messages) {
-                html += '<div class="list-group-item message"> ' + messages[i].user + ' : ' + messages[i].content;
-                html += '</div>';
+                html += '<div class="list-group-item message"> ' +messages[i].user + ' : ' + messages[i].content;
+                html+= '</div>';
                 $(".messages").html(html);
             }
         }
@@ -166,7 +167,7 @@
                     }
                     var namedata = new Object();
                     namedata = JSON.stringify(userdata[i]);
-                    html += "<li><a class='showdialog' style='cursor: pointer' onclick='javascript:showModalDialog("+namedata+");'><img src='" + userdata[i].avatar + "' width='20' height='20'>&nbsp;" + userdata[i].username + "</a></span></li>";
+                    html += "<li><a class='showdialog' style='cursor: pointer;' onclick='javascript:showModalDialog("+namedata+");'><img src='" + userdata[i].avatar + "' width='45'>&nbsp;" + userdata[i].username + "</a></span></li>";
                 }
                 $(".userlist").html(html);
             });
@@ -209,33 +210,50 @@
     <%}%>
     <div class="col-md-12">
         <div class="col-md-9">
-            <div class="pannel pannle-defaut room">
-                <div class="pannel-heading room-header">
-                    <h5>系统公告</h5>
-                    <marquee><span id="system_message">请遵守国家相关法律，文明发言</span></marquee>
-                </div>
+
+        </div>
+        <div class="pannel-heading room-header">
+            <h5>系统公告</h5>
+            <marquee><span id="system_message">请遵守国家相关法律，文明发言</span></marquee>
+        </div>
+        <div class="row">
+            <div  style="float: right;width:700px; border:10px solid; border-radius: 10px;border-color:#16a085;">
+
                 <div class="pannel body room-content">
-                    <div class="list-group messages">
-                        <div class="list-group-item message">
+                    <div class="list-group messages" style="height: 400px;">
+                        <div class="list-group-item" >
+                            <div class="message"></div>
                         </div>
                     </div>
                 </div>
-                <form class="message-creator" ng-controller="MessageCreatorCtrl">
+
+                <form class="message-creator form-inline">
                     <div class="form-group">
-                        <textarea required class="form-control message-input" placeorder="Ctrl Enter to quick send">
-                        </textarea>
+                        <img src="/images/facetitle.png" width="30"  style="margin-left:10px;"/>
+                        <input required class="form-control message-input" size="64" placeorder="Ctrl Enter to quick send" style="margin-left:10px;">
+                       <button class="btn btn-primary" >发送</button>
                     </div>
                 </form>
-            </div>
-        </div>
 
-        <div class="col-md-3" style="float:right;width:250px;">
-            <div class="list-group-item">
-                <ul><h5><b>在线用户</b></h5></ul>
-                <ul class="nav bs-docs-sidenav userlist">
-                </ul>
             </div>
-        </div>
+
+            <div class="col-sm-6 col-md-4" >
+                <div class="todo">
+                    <div class="todo-search">
+                        <input class="todo-search-field" type="search" value="" placeholder="搜索" />
+                    </div>
+                    <ul>
+                        <li class="todo-done userlist" style="background:none;">
+                            <div class="todo-icon fui-user"></div>
+                            <div class="todo-content">
+                                <h4 class="todo-name">
+                                </h4>
+                            </div>
+                        </li>
+                    </ul>
+                </div><!-- /.todo -->
+            </div><!-- /.col-md-4 -->
+        </div><!-- /.row -->
     </div>
 
 
