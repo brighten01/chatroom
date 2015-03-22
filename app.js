@@ -102,7 +102,8 @@ io.sockets.on("connection", function (socket) {
             io.sockets.in(data.room_id).emit("user_online_detail", {data: online_users});
 
         });
-        io.sockets.in(data.room_id).emit("onlineuser", {data: onlinUser});
+        //io.sockets.in(data.room_id).emit("onlineuser", {data: onlinUser});
+        socket.emit("onlineuser", {data: onlinUser});
     });
 
     /**
@@ -133,10 +134,13 @@ io.sockets.on("connection", function (socket) {
                     io.sockets.in(data.room_id).emit("user_online_detail", {data: online_users});
                 });
             }
-            io.sockets.in(data.room_id).emit("onlineuser", {data: onlinUser});
+            //io.sockets.in(data.room_id).emit("onlineuser", {data: onlinUser});
+            socket.emit("onlineuser", {data: onlinUser});
+
         } else if (onlinUser == undefined || onlinUser.length == 0) {
             onlinUser.push(data.username);
-            io.sockets.in(data.room_id).emit("onlineuser", {data: onlinUser});
+            //io.sockets.in(data.room_id).emit("onlineuser", {data: onlinUser});
+            socket.emit("onlineuser", {data: onlinUser});
             io.sockets.in(data.room_id).emit("login user", {message: "welcome " + data.username + " 进入房间 "});
             users.updateOnline(data.username, data.room_id ,function (error, online_users) {
                 if (error) {

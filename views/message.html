@@ -25,7 +25,8 @@
         var userhtml="";
         function create_user_message(message){
             var message = message.message;
-            userhtml +=  message.user + ' : ' + message.content;
+            userhtml +=  '<div class="list-group-item message"> ' +message.user + ' : ' + message.content;
+            userhtml += '</div>';
             $(".dialog").html(userhtml);
         }
 
