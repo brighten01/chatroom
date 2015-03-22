@@ -141,6 +141,7 @@ module.exports = function (app) {
                 req.flash("error", "发生错误");
             }
             room_id = room.room_id;
+            //console.log(req.session.user._id);
             if (room) {
                 //console.log(req.session.user);
                 res.render("message", {

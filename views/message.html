@@ -10,18 +10,25 @@
     <script language="javascript" src="/javascript/jquery.js"></script>
     <script language="javascript" src="/javascript/bootstrap.js"></script>
     <script language="javascript" src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="/stylesheets/bubble.css" />
     <script language="javascript">
         var user_id = "<%= user_id%>";
         var socket = io.connect("127.0.0.1:1337");
         var room_id = "<%= room_id%>";
         var to_user ="";
         var html ="";
-        function createhtml(message) {
 
-            html += '<div class="list-group-item message"> ' + message.user + ' : ' + message.content;
-            html+= '</div>';
+        function createhtml(message) {
+            html += "<div style='margin-top: 30px;'><img src='"+message.avatar+"' width='50' style='margin-top:5px; margin-left: 5px;'>";
+            html += "<div><a style='font-size: smaller '>"+message.user+"</a></div>";
+            html +='<div class="demo clearfix" style="margin-left: 15px;margin-top:-80px; ">';
+            html +='<span class="triangle">'+message.user+'</span>';
+            html +='<div class="article">'+message.content+'</div>';
+            html +=' </div>';
+            html +=' </div>';
             $(".messages").html(html);
         }
+
         var userhtml="";
         function create_user_message(message){
             var message = message.message;
@@ -65,7 +72,8 @@
                             content: value,
                             user: username,
                             time: new Date().getTime(),
-                            room_id: "<%= room_id%>"
+                            room_id: "<%= room_id%>",
+                            avatar :"<% if (user.avatar){%><%= user.avatar%><%}else{ %>/images/none.png<% } %>"
                         };
                         if (value) {
                             socket.emit("createMessage", message);
@@ -110,13 +118,11 @@
                 create_user_message(data.message);
             });
 
-
             //用户登录房间
             socket.emit("login room", {
                 username: "<% if (user){%><%= user.username%><%}else{ %> <% } %>",
                 time: new Date().getTime(),
                 room_id: "<%= room_id%>"
-
             });
 
 
@@ -227,7 +233,7 @@
             <div  style="float: right;width:700px; border:10px solid; border-radius: 10px;border-color:#16a085;">
 
                 <div class="pannel body room-content">
-                    <div class="list-group messages" style="height: 400px;">
+                    <div class="bubble list-group messages" style="height: 400px;width:670px;margin-left:2px;">
                         <div class="list-group-item" >
                             <div class="message"></div>
                         </div>
