@@ -68,7 +68,6 @@ io.sockets.on("connection", function (socket) {
            io.sockets.in(data.roomid).emit("system message",{message:data.message});
            socket.leave(data.roomid);
         }else{
-           console.log(data);
            socket.emit("system message",{message:data.message});
        }
    });
@@ -76,7 +75,7 @@ io.sockets.on("connection", function (socket) {
      * 设置房间
      */
     socket.on("setroom", function (data) {
-        socket.room_id = data.room_id;
+        //socket.room_id = data.room_id;
         socket.join(socket.room_id);
     });
 
@@ -95,12 +94,13 @@ io.sockets.on("connection", function (socket) {
         socket.join(data.room_id);
         onlinUser.splice(onlinUser.indexOf(data.username), 1);
         //延迟发送
-        users.deleteOnline(data.username, function (error, online_users) {
+        users.deleteOnline(data.username, data.room_id ,function (error, online_users) {
             if (error) {
                 console.log(error);
                 return false;
             }
             io.sockets.in(data.room_id).emit("user_online_detail", {data: online_users});
+
         });
         io.sockets.in(data.room_id).emit("onlineuser", {data: onlinUser});
     });
@@ -109,17 +109,15 @@ io.sockets.on("connection", function (socket) {
      * 登录房间
      */
     socket.on("login room", function (data) {
-        console.log(data.username+"登入");
         // 推送在线用户
         socket.join(data.room_id);
         clients[data.username] = socket;
-        users.getOnline(function (error, online_users) {
+        users.getOnline(data.room_id,function (error, online_users) {
             if (error) {
                 console.log(error);
                 return false;
             }
-
-            io.sockets.in(data.room_id).emit("user_online_detail", {data: online_users});
+            io.sockets.in(data.room_id).emit("user_online_detail",{data:online_users});
         });
 
         if (onlinUser.length > 0) {
@@ -127,22 +125,20 @@ io.sockets.on("connection", function (socket) {
             if (flag == false) {
                 onlinUser.push(data.username);
                 io.sockets.in(data.room_id).emit("login user", {message: "welcome " + data.username + " 进入房间 "});
-                users.updateOnline(data.username, function (error, online_users) {
+                users.updateOnline(data.username, data.room_id ,function (error, online_users) {
                     if (error) {
                         console.log(error);
                         return false;
                     }
-
                     io.sockets.in(data.room_id).emit("user_online_detail", {data: online_users});
                 });
-
             }
             io.sockets.in(data.room_id).emit("onlineuser", {data: onlinUser});
         } else if (onlinUser == undefined || onlinUser.length == 0) {
             onlinUser.push(data.username);
             io.sockets.in(data.room_id).emit("onlineuser", {data: onlinUser});
             io.sockets.in(data.room_id).emit("login user", {message: "welcome " + data.username + " 进入房间 "});
-            users.updateOnline(data.username, function (error, online_users) {
+            users.updateOnline(data.username, data.room_id ,function (error, online_users) {
                 if (error) {
                     console.log(error);
                     return false;
@@ -164,8 +160,6 @@ io.sockets.on("connection", function (socket) {
             clients[from_user].emit("say", {message: data});
             clients[to_user].emit("say", {message: data});
         }, 100);
-
-
     })
 });
 

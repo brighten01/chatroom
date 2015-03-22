@@ -159,17 +159,16 @@
             // 在线用户
             socket.on("user_online_detail", function (data) {
                 var  userdata = data.data;
-
-                var html = "";
+                var onlineusers = "";
                 for (var i = 0; i < userdata.length; i++) {
                     if (userdata[i].avatar == "" || userdata[i].avatar == undefined) {
                         userdata[i].avatar = "/images/none.png";
                     }
                     var namedata = new Object();
                     namedata = JSON.stringify(userdata[i]);
-                    html += "<li><a class='showdialog' style='cursor: pointer;' onclick='javascript:showModalDialog("+namedata+");'><img src='" + userdata[i].avatar + "' width='45'>&nbsp;" + userdata[i].username + "</a></span></li>";
+                    onlineusers += "<li><a class='showdialog' style='cursor: pointer;' onclick='javascript:showModalDialog("+namedata+");'><img src='" + userdata[i].avatar + "' width='45'>&nbsp;" + userdata[i].username + "</a></span></li>";
                 }
-                $(".userlist").html(html);
+                $(".userlist").html(onlineusers);
             });
 
         });
@@ -230,13 +229,11 @@
                 <form class="message-creator form-inline">
                     <div class="form-group">
                         <img src="/images/facetitle.png" width="30"  style="margin-left:10px;"/>
-                        <input required class="form-control message-input" size="64" placeorder="Ctrl Enter to quick send" style="margin-left:10px;">
+                        <input required class="form-control message-input" size="62" placeorder="Ctrl Enter to quick send" >
                        <button class="btn btn-primary" >发送</button>
                     </div>
                 </form>
-
             </div>
-
             <div class="col-sm-6 col-md-4" >
                 <div class="todo">
                     <div class="todo-search">

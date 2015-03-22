@@ -16,7 +16,7 @@ User.prototype.save = function (callback) {
         username: this.username,
         password: this.password,
         email: this.email,
-        avatar : this.avatar
+        avatar: this.avatar
     };
     mongodb.open(function (error, db) {
         if (error) {
@@ -28,11 +28,11 @@ User.prototype.save = function (callback) {
                 callback(error);
             }
             collection.insert(user, {safe: true}, function (error, user) {
-                    if (error) {
-                        return callback(error);
-                    }
-                    callback(null, user);
-                });
+                if (error) {
+                    return callback(error);
+                }
+                callback(null, user);
+            });
         });
     });
 }
@@ -60,10 +60,11 @@ User.getOne = function (username, callback) {
     });
 }
 /**
- * 获取在线的用户
+ * 获取在线人数
+ * @param room_id
  * @param callback
  */
-User.getOnline = function (callback) {
+User.getOnline = function (room_id, callback) {
     mongodb.close();
     mongodb.open(function (error, db) {
 
@@ -73,12 +74,11 @@ User.getOnline = function (callback) {
         }
 
         db.collection("users", function (error, collection) {
-          //  console.log(collection);
-            collection.find({online: 1}).sort({"time":-1}).toArray(function (error,userlist){
-                if(error){
+            collection.find({"room_id": room_id, "online": 1}).sort({"time": -1}).toArray(function (error, userlist) {
+                if (error) {
                     return callback(error);
                 }
-                callback(null ,userlist);
+                callback(null, userlist);
             });
         });
     });
@@ -86,22 +86,23 @@ User.getOnline = function (callback) {
 }
 
 /**
- * 删除在线用户
+ *删除在线人数
  * @param username
+ * @param room_id
  * @param callback
  */
-User.deleteOnline = function (username, callback) {
+User.deleteOnline = function (username, room_id, callback) {
     mongodb.close();
-    var _self= this;
+    var _self = this;
     mongodb.open(function (error, db) {
         db.collection("users", function (error, collection) {
-            collection.update({"username": username}, {$set: {"online": 0}}, function (error, doc) {
-                if(error){
+            collection.update({"username": username}, {$set: {"online": 0, "room_id": 0}}, function (error, doc) {
+                if (error) {
                     return callback(error);
                 }
                 //直接取得线上人数
-                _self.getOnline(function(error,online_users){
-                    callback(null,online_users);
+                _self.getOnline(room_id, function (error, online_users) {
+                    callback(null, online_users);
                 });
 
             });
@@ -110,11 +111,12 @@ User.deleteOnline = function (username, callback) {
 }
 
 /**
- * 更新在线状态
+ * 更新用户在线状态
  * @param username
+ * @param room_id
  * @param callback
  */
-User.updateOnline = function (username, callback) {
+User.updateOnline = function (username, room_id, callback) {
     mongodb.close();
     var _self = this;
     mongodb.open(function (error, db) {
@@ -123,12 +125,12 @@ User.updateOnline = function (username, callback) {
             mongodb.close();
         }
         db.collection("users", function (error, collection) {
-            collection.update({"username": username}, {$set:{"online":1}}, function (error, doc) {
-                if(error){
+            collection.update({"username": username}, {$set: {"online": 1,"room_id":room_id}}, function (error, doc) {
+                if (error) {
                     return callback(error);
                 }
-                _self.getOnline(function(error,onlin_users){
-                   return callback(null,onlin_users);
+                _self.getOnline(room_id,function (error, onlin_users) {
+                    return callback(null, onlin_users);
                 });
                 //callback(null,doc);
 
