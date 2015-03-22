@@ -217,7 +217,7 @@ module.exports = function (app) {
             if (roomlist) {
                 rooms = roomlist;
             }
-            res.render("roomlist", {
+             res.render("roomlist", {
                 title: "房间里列表",
                 user: req.session.user,
                 error: req.flash("error").toString(),

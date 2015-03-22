@@ -62,12 +62,13 @@ io.sockets.on("connection", function (socket) {
         }
     });
 
+
     socket.on("show system message",function(data){
        if(data.roomid!=''){
            socket.join(data.roomid);
            io.sockets.in(data.roomid).emit("system message",{message:data.message});
-           socket.leave(data.roomid);
         }else{
+           socket.leave(data.room_id);
            socket.emit("system message",{message:data.message});
        }
    });

@@ -86,6 +86,7 @@
                 console.log(message);
                 $("#system_message").html(message);
             });
+
             //单独用户窗口发送消息
             $(".sendmessage").click(function (){
                 var message = {
@@ -121,7 +122,13 @@
 
             // 当用户登录房间
             socket.on("login user", function (data) {
-                console.log("welcome user " + data.message);
+
+                var div ="<div id=\"welcome\">"+data.message+"</div>";
+                $(".messages").append(div);
+                $("#welcome").fadeOut(5000);
+                setTimeout(function (){
+                    $("#welcome").remove();
+                },5000);
             });
             socket.on("connected", function (data) {
                 alert(data.message);
