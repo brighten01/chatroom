@@ -11,6 +11,7 @@
     <script language="javascript" src="/javascript/bootstrap.js"></script>
     <script language="javascript" src="/socket.io/socket.io.js"></script>
     <link rel="stylesheet" href="/stylesheets/bubble.css" />
+
     <script language="javascript">
         var user_id = "<%= user_id%>";
         var socket = io.connect("127.0.0.1:1337");
@@ -18,6 +19,7 @@
         var to_user ="";
         var html ="";
 
+        var username = "<% if (user){%><%= user.username%><%}else{ %> <% } %>";
         function createhtml(message) {
             html += "<div style='margin-top: 30px;'><img src='"+message.avatar+"' width='50' style='margin-top:5px; margin-left: 5px;'>";
             html += "<div><a style='font-size: smaller '>"+message.user+"</a></div>";
@@ -27,14 +29,25 @@
             html +=' </div>';
             html +=' </div>';
             $(".messages").html(html);
+            if($(".messages")[0].scrollHeight >$(".messages").height()) {
+                $(".messages").scrollTop($(".messages")[0].scrollHeight);
+            }
         }
 
         var userhtml="";
         function create_user_message(message){
             var message = message.message;
-            userhtml +=  '<div class="list-group-item message"> ' +message.user + ' : ' + message.content;
-            userhtml += '</div>';
-            $(".dialog").html(userhtml);
+           userhtml += "<div style='margin-top: 30px;'><img src='"+message.avatar+"' width='50' style='margin-top:5px; margin-left: 5px;'>";
+           userhtml += "<div><a style='font-size: smaller '>"+message.user+"</a></div>";
+           userhtml +='<div class="demo clearfix" style="margin-left: 15px;margin-top:-80px; ">';
+           userhtml +='<span class="triangle">'+message.user+'</span>';
+           userhtml +='<div class="article">'+message.content+'</div>';
+           userhtml +=' </div>';
+           userhtml +=' </div>';
+           $(".dialog").html(userhtml);
+            if($(".dialog")[0].scrollHeight >$(".dialog").height()) {
+                $(".dialog").scrollTop($(".dialog")[0].scrollHeight);
+            }
         }
 
         function createhtml2(messages) {
@@ -61,7 +74,7 @@
                         ctrlDown = false
                     }, 1000);
                 }
-                var username = "<% if (user){%><%= user.username%><%}else{ %> <% } %>";
+
                 if (event.keyCode === 13) {
                     if (ctrlDown) {
                         $(".message-input").val("");
@@ -87,11 +100,8 @@
             });
 
             // 系统消息
-
             socket.on("system message",function (data){
                 var message = data.message;
-                console.log("接收消息");
-                console.log(message);
                 $("#system_message").html(message);
             });
 
@@ -103,7 +113,8 @@
                     time: new Date().getTime(),
                     room_id: "<%= room_id%>",
                     to_user:to_user,
-                    from_user: "<% if (user){%><%= user.username%><%}else{ %> <% } %>"
+                    from_user: "<% if (user){%><%= user.username%><%}else{ %> <% } %>",
+                    avatar :"<% if (user.avatar){%><%= user.avatar%><%}else{ %>/images/none.png<% } %>"
                 };
 
                 socket.emit("sayto",{message:message});
@@ -114,7 +125,6 @@
              * 接受单聊信息
              */
             socket.on("say",function (data){
-                console.log(data);
                 create_user_message(data.message);
             });
 
@@ -146,7 +156,6 @@
             socket.on("onlineuser", function (data) {
                 //此处处理users;
                 console.log(data.data);
-
             });
             socket.emit('getAllMessages', {room_id: "<%= room_id%>"});
             //登录房间
@@ -156,20 +165,28 @@
                 createhtml2(messages);
             });
 
-            socket.on("exist user",function(data){
-                //userdata
-                if(data!==null ||data.length!=0 || data!==undefined ){
-                    for(var i=0;i<data.length;i++){
-
-                    }
-                }
-            });
-
             $("#logout").click(function () {
                 socket.emit("leave room", {username: "<% if (user){%><%= user.username%><%}else{ %> <% } %>",room_id:room_id});
                 location.href = "/logout";
             });
 
+            /**
+             * 已经退出聊天室
+             */
+            socket.on("disconnect room",function (data){
+                var leave_room_msg  = "<div id=\"disconnect_room\">"+data.username+" 已经离开聊天室</div>";
+                $(".messages").append(leave_room_msg);
+                $("#disconnect_room").fadeOut(5000);
+            });
+
+            /**
+             * 退出整个系统
+             */
+            socket.on("disconnect system",function (data){
+                var leave_sys_msg  = "<div id=\"leave_system\">"+data.username+" 已经离开聊天室</div>";
+                $(".messages").append(leave_sys_msg);
+                $("#leave_system").fadeOut(5000);
+            });
             // 在线用户
             socket.on("user_online_detail", function (data) {
                 var  userdata = data.data;
@@ -183,6 +200,19 @@
                     onlineusers += "<li><a class='showdialog' style='cursor: pointer;' onclick='javascript:showModalDialog("+namedata+");'><img src='" + userdata[i].avatar + "' width='45'>&nbsp;" + userdata[i].username + "</a></span></li>";
                 }
                 $(".userlist").html(onlineusers);
+            });
+
+            //断开连接
+            socket.on('reconnect',function(){
+                var msg = '<div id="reconnect" style="color:#f00">您已经重新连接服务器</div>';
+                $(".messages").append(msg);
+                $("#reconnect").fadeOut(5000);
+            });
+
+            socket.on('disconnect',function(){
+                var msg = '<div id="disconnect" style="color:#f00">您已经断开连接</div>';
+                $(".messages").append(msg);
+                $("#disconnect").fadeOut(5000);
             });
 
         });
@@ -233,9 +263,9 @@
             <div  style="float: right;width:700px; border:10px solid; border-radius: 10px;border-color:#16a085;">
 
                 <div class="pannel body room-content">
-                    <div class="bubble list-group messages" style="height: 400px;width:670px;margin-left:2px;">
-                        <div class="list-group-item" >
-                            <div class="message"></div>
+                    <div class="bubble list-group messages" style="height: 400px;width:670px;margin-left:2px;overflow: scroll">
+                        <div class="list-group-item" style="border:none;" >
+                            <!--<div class="message" style="overflow: auto"></div>-->
                         </div>
                     </div>
                 </div>
@@ -250,7 +280,7 @@
             </div>
             <div class="col-sm-6 col-md-4" >
                 <div class="todo">
-                    <div class="todo-search">
+                    <div class="todo-search" style="overflow: hidden">
                         <input class="todo-search-field" type="search" value="" placeholder="搜索" />
                     </div>
                     <ul>
@@ -277,7 +307,7 @@
                 <div class="modal-body">
                     <div class="pannel body room-content" >
                         <div class="list-group user_message" >
-                            <div class="list-group-item dialog" style="height: 300px;">
+                            <div class="list-group-item dialog" style="height: 300px;overflow: scroll">
                             </div>
                         </div>
                     </div>

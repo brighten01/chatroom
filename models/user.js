@@ -100,11 +100,13 @@ User.deleteOnline = function (username, room_id, callback) {
                 if (error) {
                     return callback(error);
                 }
-                //直接取得线上人数
-                _self.getOnline(room_id, function (error, online_users) {
-                    callback(null, online_users);
-                });
 
+                //如果是在其他页面退出则不广播
+                if(room_id!=null || room_id!==undefined){
+                    _self.getOnline(room_id, function (error, online_users) {
+                        callback(null, online_users);
+                    });
+                }
             });
         });
     });

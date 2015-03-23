@@ -9,7 +9,7 @@ module.exports = function (app) {
      */
     app.get("/", checkLogin);
     app.get("/", function (req, res) {
-        if(!req.session.user){
+        if (!req.session.user) {
             return res.redirect("/login");
         }
         res.redirect("/roomlist");
@@ -141,6 +141,8 @@ module.exports = function (app) {
                 req.flash("error", "发生错误");
             }
             room_id = room.room_id;
+            //登录之后将room_id 记录到session中
+            req.session.room_id = room_id;
             //console.log(req.session.user._id);
             if (room) {
                 //console.log(req.session.user);
@@ -214,16 +216,19 @@ module.exports = function (app) {
             if (error) {
                 req.flash("error", "房间列表载入出错" + error);
             }
+
             var rooms = null;
             if (roomlist) {
                 rooms = roomlist;
             }
-             res.render("roomlist", {
+
+            res.render("roomlist", {
                 title: "房间里列表",
                 user: req.session.user,
                 error: req.flash("error").toString(),
                 success: req.flash("success").toString(),
-                roomlist: rooms
+                roomlist: rooms,
+                room_id: req.session.room_id
             });
         });
     });
@@ -236,25 +241,26 @@ module.exports = function (app) {
         var tmpFile = req.files.uploadfile.path;
         var year = new Date().getFullYear();
         var month = new Date().getMonth();
-        var datetime =new Date().getDate();
+        var datetime = new Date().getDate();
         var time = new Date().getTime();
         var ext = ".jpg";
         var uploadImagePath = "public/uploadfiles/" + year + "/" + month + "/" + datetime.toString();
-        var staticImagePath = "/uploadfiles/" + year + "/" + month + "/" + datetime.toString()+"/" + time + ext;
+        var staticImagePath = "/uploadfiles/" + year + "/" + month + "/" + datetime.toString() + "/" + time + ext;
         var newImagePath = uploadImagePath + "/" + time + ext;
         var file = require("../models/file.js");
 
         // 上传文件
         file.createDir(uploadImagePath, "777", function (result) {
-           if(req.files.uploadfile.path!=''){
-               file.saveFile(req.files.uploadfile.path ,newImagePath,function (result){;
-                   if(result ==true){
-                       res.send('{success:"成功上传文件",targetFile:"'+staticImagePath+'",error:""}');
-                   }else{
-                       res.send('{error:result,success:""}');
-                   }
-               });
-           }
+            if (req.files.uploadfile.path != '') {
+                file.saveFile(req.files.uploadfile.path, newImagePath, function (result) {
+                    ;
+                    if (result == true) {
+                        res.send('{success:"成功上传文件",targetFile:"' + staticImagePath + '",error:""}');
+                    } else {
+                        res.send('{error:result,success:""}');
+                    }
+                });
+            }
 
         });
 
@@ -265,14 +271,14 @@ module.exports = function (app) {
      */
     app.get("/system_message", checkLogin);
 
-    app.get("/system_message",function(req , res) {
-        Room.getList(function (error,roomlist){
-             res.render("system_message",{
-                user:req.session.user,
+    app.get("/system_message", function (req, res) {
+        Room.getList(function (error, roomlist) {
+            res.render("system_message", {
+                user: req.session.user,
                 title: "发送系统消息",
-                success:req.flash("success").toString(),
-                error:req.flash("error").toString(),
-                roomlist:roomlist
+                success: req.flash("success").toString(),
+                error: req.flash("error").toString(),
+                roomlist: roomlist
             });
         });
     });
@@ -281,23 +287,23 @@ module.exports = function (app) {
      * 发送系统消息
      */
     app.get("/system_message", checkLogin);
-    app.post("/system_message",function (req,res){
+    app.post("/system_message", function (req, res) {
         var content = req.body.content;
         var roomid = req.body.roomlist;
-        if(roomid==null){
-            roomid=0;
+        if (roomid == null) {
+            roomid = 0;
         }
-        var new_message= new Message({
-            content : content,
-            room_id :roomid
+        var new_message = new Message({
+            content: content,
+            room_id: roomid
         });
 
-        new_message.save(function (error,doc){
-            if(error){
-                req.flash("error","发送系统消息失败");
+        new_message.save(function (error, doc) {
+            if (error) {
+                req.flash("error", "发送系统消息失败");
                 return res.redirect("/");
             }
-            req.flash("success","发送系统消息成功");
+            req.flash("success", "发送系统消息成功");
             res.redirect("/system_message");
         });
     });

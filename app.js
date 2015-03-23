@@ -10,12 +10,10 @@ var MongoStore = require("connect-mongo")(express);
 var sessionStore = new MongoStore({
     db: settings.db
 });
-//var Cookie = require("cookie");
 var flash = require("connect-flash");
 var app = express();
 // 设置html引擎
 app.use(flash());
-//app.set("view engine","ejs");
 app.engine('.html', require('ejs').__express);
 app.set('view engine', 'html');
 app.use(express.json());
@@ -91,7 +89,6 @@ io.sockets.on("connection", function (socket) {
      *  离开房间
      */
     socket.on('leave room', function (data) {
-        //onlinUser = checkdata.del(onlinUser, data.username);
         socket.join(data.room_id);
         onlinUser.splice(onlinUser.indexOf(data.username), 1);
         //延迟发送
@@ -101,10 +98,11 @@ io.sockets.on("connection", function (socket) {
                 return false;
             }
             io.sockets.in(data.room_id).emit("user_online_detail", {data: online_users});
-
+            io.sockets.in(data.room_id).emit("disconnect room", {username: data.username});
         });
-        //io.sockets.in(data.room_id).emit("onlineuser", {data: onlinUser});
         socket.emit("onlineuser", {data: onlinUser});
+        // 广播离开整个系统
+        socket.emit("disconnect system", {username: data.username});
     });
 
     /**
@@ -135,12 +133,10 @@ io.sockets.on("connection", function (socket) {
                     io.sockets.in(data.room_id).emit("user_online_detail", {data: online_users});
                 });
             }
-            //io.sockets.in(data.room_id).emit("onlineuser", {data: onlinUser});
             socket.emit("onlineuser", {data: onlinUser});
 
         } else if (onlinUser == undefined || onlinUser.length == 0) {
             onlinUser.push(data.username);
-            //io.sockets.in(data.room_id).emit("onlineuser", {data: onlinUser});
             socket.emit("onlineuser", {data: onlinUser});
             io.sockets.in(data.room_id).emit("login user", {message: "welcome " + data.username + " 进入房间 "});
             users.updateOnline(data.username, data.room_id ,function (error, online_users) {
@@ -165,7 +161,8 @@ io.sockets.on("connection", function (socket) {
             clients[from_user].emit("say", {message: data});
             clients[to_user].emit("say", {message: data});
         }, 100);
-    })
+    });
+
 });
 
 routes(app);

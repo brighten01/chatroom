@@ -10,6 +10,23 @@
     <script language="javascript" src="/javascript/bootstrap.js"></script>
     <script language="javascript" src="/socket.io/socket.io.js"></script>
     <script language="javascript" >
+        var socket = io.connect("http://127.0.0.1:1337");
+        // 设置全局变量room_id username
+        var username = "<%=user.username%>";
+        var room_id = "<%= room_id%>";
+        $(document).ready(function (){
+            $("#logout").click(function (){
+                var senddata ;
+                if(room_id) {
+                    senddata ={username:"<%= user.username%>",room_id:room_id};
+                }else{
+                    senddata = {username:"<%=user.username%>"};
+                }
+
+                socket.emit("leave room",senddata);
+                location.href="/logout";
+            });
+        });
     </script>
 </head>
 <body>
@@ -29,7 +46,7 @@
                 <li>
                     <% if (user){ %>
                     <a class="navbar-brand"><span>欢迎回来</span> <span><%= user.username%></span></a>
-                    <a class="navbar-brand" href="/logout">退出</a>
+                    <a class="navbar-brand" id="logout"  style="cursor: pointer">退出</a>
                     <%}else{%>
                     <a class="navbar-brand">登录</a>
                     <a class="navbar-brand">注册</a>
