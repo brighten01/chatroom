@@ -18,13 +18,25 @@
         var html ="";
         var username = "<% if (user){%><%= user.username%><%}else{ %> <% } %>";
         function createhtml(message) {
-            html += "<div style='margin-top: 30px;'><img src='"+message.avatar+"' width='50' style='margin-top:5px; margin-left: 5px;'>";
-            html += "<div><a style='font-size: smaller '>"+message.user+"</a></div>";
-            html +='<div class="demo clearfix" style="margin-left: 15px;margin-top:-80px; ">';
-            html +='<span class="triangle">'+message.user+'</span>';
-            html +='<div class="article">'+message.content+'</div>';
-            html +=' </div>';
-            html +=' </div>';
+			if(message.user==username){
+				 html += "<div style='margin-top: 30px;'><img src='"+message.avatar+"' width='50' style='margin-top:5px; margin-left: 5px;'>";
+				 html += "<div><a style='font-size: 12pt;'>"+message.user+"</a></div>";
+				 html +='<div class="demo clearfix" style="margin-left: 15px;margin-top:-80px; ">';
+				 html +='<span class="triangle">'+message.user+'</span>';
+				 html +='<div class="article">'+message.content+'</div>';
+				 html +=' </div>';
+				 html +=' </div>';
+			}else{
+				html += "<div style='margin-top: 30px;'><img src='"+message.avatar+"' width='50' style='float:right;margin-top:15px; margin-left: 10px;'>";
+			
+				html +='<div class="demo clearfix fr" style="margin-right: 15px;margin-top:-20px; ">';
+				html+='<span class="triangle right">'+message.user+'</span>';
+				html+='<div class="article" style="margin-top:20px;">'+message.content+'</div>';
+				html += '<div style="float:right;margin-top:65px;margin-right:-136px;"><a style="font-size:12pt;">'+message.user+'</a></div>';
+				html+='	 </div>';
+				html +=' </div>';
+			}
+           
             $(".messages").html(html);
             if($(".messages")[0].scrollHeight >$(".messages").height()) {
                 $(".messages").scrollTop($(".messages")[0].scrollHeight);
