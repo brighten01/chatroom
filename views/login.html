@@ -10,6 +10,10 @@
     <script language="javascript" src="/javascript/jquery.js"></script>
     <script language="javascript" src="/javascript/bootstrap.js"></script>
     <script language="javascript" src="/socket.io/socket.io.js"></script>
+    <!--[if lt IE 9]>
+    <script src="/javascript/html5shiv.js"></script>
+    <script src="/javascript/respond.min.js"></script>
+    <![endif]-->
     <script language="javascript">
         $(document).ready(function (){
             $("#login").click(function (){
@@ -29,7 +33,7 @@
 <div class="container" style="margin-top: 100px;">
     <form name="login_form" id="login-form"  method="post">
     <div class="login">
-        <div class="login-screen" style="width:870px;overflow: hidden;">
+        <div class="login-screen" style="width:865px;">
             <div class="login-icon">
                 <img src="/img/login/chat.png" alt="Welcome to Chatroom" />
                 <h4>Welcome to <small>ChatRoom</small></h4>
@@ -51,5 +55,11 @@
         </div>
     </div>
     </form>
+    <!--[if lt IE ]>
+  <script language="javascript">
+        $(".login-screen").css("min-height","320px");
+  </script>
+   <![endif]-->
+</div>
 </body>
 </html>

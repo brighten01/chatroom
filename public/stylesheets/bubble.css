@@ -52,3 +52,11 @@
 .fr .article {
     float:right;
 }
+
+.message_send {
+    float: right;
+    width: 700px;
+    border: 10px solid;
+    border-radius: 10px;
+    border-color: #16a085;
+}

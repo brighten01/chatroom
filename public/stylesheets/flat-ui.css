@@ -5594,6 +5594,7 @@ fieldset[disabled] .navbar-inverse .navbar-btn.active {
   margin-bottom: 20px;
   color: #798795;
   border-radius: 6px;
+    width: 350px;
   }
 .todo ul {
   padding: 0;
@@ -5601,6 +5602,7 @@ fieldset[disabled] .navbar-inverse .navbar-btn.active {
   list-style-type: none;
   background-color: #2c3e50;
   border-radius: 0 0 6px 6px;
+  width: 350px;
   }
 .todo li {
   position: relative;
@@ -5622,8 +5624,9 @@ fieldset[disabled] .navbar-inverse .navbar-btn.active {
   border-radius: 0 0 6px 6px;
   }
 .todo li.todo-done {
-  color: #1abc9c;
-  background: transparent;
+    color: #1abc9c;
+    background: transparent;
+    width: 350px;
   }
 .todo li.todo-done .todo-name {
   color: #1abc9c;
@@ -5663,6 +5666,7 @@ fieldset[disabled] .navbar-inverse .navbar-btn.active {
   background: #1abc9c;
   background-size: 16px 16px;
   border-radius: 6px 6px 0 0;
+  width:350px;
   }
 .todo-search:before {
   position: absolute;

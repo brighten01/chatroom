@@ -140,20 +140,16 @@ module.exports = function (app) {
             if (error) {
                 req.flash("error", "发生错误");
             }
-            room_id = room.room_id;
-            //登录之后将room_id 记录到session中
             req.session.room_id = room_id;
-            //console.log(req.session.user._id);
+
             if (room) {
-                //console.log(req.session.user);
                 res.render("message", {
                     title: "房间" + name,
                     error: req.flash("error").toString(),
                     success: req.flash("success").toString(),
                     user: req.session.user,
                     room: name,
-                    room_id: room_id,
-                    user_id: req.session.user._id
+                    room_id: room.room_id
                 });
             } else {
                 //否则跳转

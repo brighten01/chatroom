@@ -3,7 +3,7 @@
 <head>
     <base>
     <meta http-equiv="Content-type=text/html;charset=utf-8"/>
-    <title>聊天室</title>
+    <title><%=title%></title>
     <link rel="stylesheet" href="/stylesheets/bootstrap-theme.css"/>
     <link rel="stylesheet" href="/stylesheets/bootstrap.css"/>
     <link rel="stylesheet" href="/stylesheets/flat-ui.css" />
@@ -11,14 +11,11 @@
     <script language="javascript" src="/javascript/bootstrap.js"></script>
     <script language="javascript" src="/socket.io/socket.io.js"></script>
     <link rel="stylesheet" href="/stylesheets/bubble.css" />
-
     <script language="javascript">
-        var user_id = "<%= user_id%>";
         var socket = io.connect("127.0.0.1:1337");
         var room_id = "<%= room_id%>";
         var to_user ="";
         var html ="";
-
         var username = "<% if (user){%><%= user.username%><%}else{ %> <% } %>";
         function createhtml(message) {
             html += "<div style='margin-top: 30px;'><img src='"+message.avatar+"' width='50' style='margin-top:5px; margin-left: 5px;'>";
@@ -106,7 +103,7 @@
             });
 
             //单独用户窗口发送消息
-            $(".sendmessage").click(function (){
+            $(".sendmessage").click(function (event){
                 var message = {
                     content: $("#usercontent").val(),
                     user: "<% if (user){%><%= user.username%><%}else{ %> <% } %>",
@@ -138,13 +135,16 @@
 
             // 当用户登录房间
             socket.on("login user", function (data) {
+                // todo 自己登陆的时候需不需要显示欢迎自己的信息可以自定义去掉if条件
+                if(data.username != username){
+                    var div ="<div id=\"welcome\">"+data.message+"</div>";
+                    $(".messages").append(div);
+                    $("#welcome").fadeOut(5000);
+                    setTimeout(function (){
+                        $("#welcome").remove();
+                    },5000);
+                }
 
-                var div ="<div id=\"welcome\">"+data.message+"</div>";
-                $(".messages").append(div);
-                $("#welcome").fadeOut(5000);
-                setTimeout(function (){
-                    $("#welcome").remove();
-                },5000);
             });
             socket.on("connected", function (data) {
                 alert(data.message);
@@ -155,7 +155,7 @@
 
             socket.on("onlineuser", function (data) {
                 //此处处理users;
-                console.log(data.data);
+//                console.log(data.data);
             });
             socket.emit('getAllMessages', {room_id: "<%= room_id%>"});
             //登录房间
@@ -215,6 +215,7 @@
                 $("#disconnect").fadeOut(5000);
             });
 
+
         });
     </script>
 </head>
@@ -260,25 +261,22 @@
             <marquee><span id="system_message">请遵守国家相关法律，文明发言</span></marquee>
         </div>
         <div class="row">
-            <div  style="float: right;width:700px; border:10px solid; border-radius: 10px;border-color:#16a085;">
-
+            <div  class="message_send">
                 <div class="pannel body room-content">
-                    <div class="bubble list-group messages" style="height: 400px;width:670px;margin-left:2px;overflow: scroll">
+                    <div class="bubble list-group messages" style="height: 400px;width:670px;margin-left:2px;overflow:scroll">
                         <div class="list-group-item" style="border:none;" >
-                            <!--<div class="message" style="overflow: auto"></div>-->
                         </div>
                     </div>
                 </div>
 
-                <form class="message-creator form-inline">
-                    <div class="form-group">
-                        <img src="/images/facetitle.png" width="30"  style="margin-left:10px;"/>
-                        <input required class="form-control message-input" size="62" placeorder="Ctrl Enter to quick send" >
-                       <button class="btn btn-primary" >发送</button>
-                    </div>
-                </form>
+                <div class="form-group form-inline">
+                    <label><img src="/images/facetitle.png" width="30" style="margin-left:10px;"/></label>
+                    <input required  style="width: 550px;" size="20" class="form-control message-input"
+                           placeorder="Ctrl Enter to quick send">
+                    <button class="btn btn-primary" type="button">发送</button>
+                </div>
             </div>
-            <div class="col-sm-6 col-md-4" >
+            <div class="container">
                 <div class="todo">
                     <div class="todo-search" style="overflow: hidden">
                         <input class="todo-search-field" type="search" value="" placeholder="搜索" />
@@ -305,7 +303,7 @@
                     <span><img id="avatar" width="50" height="50" /><a id="chatto_user" style="margin-left: 20px;"></a></span>
                 </div>
                 <div class="modal-body">
-                    <div class="pannel body room-content" >
+                    <div class="pannel body room-content">
                         <div class="list-group user_message" >
                             <div class="list-group-item dialog" style="height: 300px;overflow: scroll">
                             </div>
@@ -323,5 +321,10 @@
         </div>
     </div>
 </div>
+<!--[if IE ]>
+<script language="javascript">
+    $(".message_send").css("margin-right","300px");
+</script>
+<![endif]-->
 </body>
 </html>

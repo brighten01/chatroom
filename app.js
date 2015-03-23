@@ -124,7 +124,7 @@ io.sockets.on("connection", function (socket) {
             var flag = checkdata.find(onlinUser, data.username);
             if (flag == false) {
                 onlinUser.push(data.username);
-                io.sockets.in(data.room_id).emit("login user", {message: "welcome " + data.username + " 进入房间 "});
+                io.sockets.in(data.room_id).emit("login user", {message: "欢迎 " + data.username + " 进入房间 ",username:data.username});
                 users.updateOnline(data.username, data.room_id ,function (error, online_users) {
                     if (error) {
                         console.log(error);
@@ -138,7 +138,7 @@ io.sockets.on("connection", function (socket) {
         } else if (onlinUser == undefined || onlinUser.length == 0) {
             onlinUser.push(data.username);
             socket.emit("onlineuser", {data: onlinUser});
-            io.sockets.in(data.room_id).emit("login user", {message: "welcome " + data.username + " 进入房间 "});
+            io.sockets.in(data.room_id).emit("login user", {message: "欢迎 " + data.username + " 进入房间 ",username:data.username});
             users.updateOnline(data.username, data.room_id ,function (error, online_users) {
                 if (error) {
                     console.log(error);

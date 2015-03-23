@@ -12,7 +12,7 @@
     <script language="javascript" >
         var socket = io.connect("http://127.0.0.1:1337");
         // 设置全局变量room_id username
-        var username = "<%=user.username%>";
+        var username = "<%= user.username%>";
         var room_id = "<%= room_id%>";
         $(document).ready(function (){
             $("#logout").click(function (){
