@@ -143,7 +143,8 @@ module.exports = function (app) {
             }
             var avatar = "/images/none.png";
             req.session.room_id = room_id;
-            if(req.session.user.avatar!=null || req.session.user.avatar!=="" || req.session.user.avatar!=undefined) {
+
+            if(req.session.user!=null || req.session.user!=="" || req.session.user!=undefined) {
                 avatar = req.session.user.avatar;
             }
 
