@@ -25,7 +25,7 @@ app.use(express.cookieParser());
 app.use(express.session({
     secret: settings.cookieSecret,
     key: settings.db,
-    cookie: {maxAge: 1000 * 60 * 60 * 24 * 30},
+    cookie: {maxAge: 1000 * 60 * 60 * 24},
     store: sessionStore
 }));
 var system_message = require("./models/message.js");

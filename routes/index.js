@@ -213,17 +213,12 @@ module.exports = function (app) {
                 req.flash("error", "房间列表载入出错" + error);
             }
 
-            var rooms = null;
-            if (roomlist) {
-                rooms = roomlist;
-            }
-
-            res.render("roomlist", {
+            return res.render("roomlist", {
                 title: "房间里列表",
                 user: req.session.user,
                 error: req.flash("error").toString(),
                 success: req.flash("success").toString(),
-                roomlist: rooms,
+                roomlist: roomlist,
                 room_id: req.session.room_id
             });
         });

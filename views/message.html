@@ -18,6 +18,9 @@
         var html ="";
         var username = "<% if (user){%><%= user.username%><%}else{ %> <% } %>";
         function createhtml(message) {
+            if(message.avatar==undefined || message.avatar==null ||message.avatar==""){
+                message.avatar = "/images/none.png";
+            }
 			if(message.user==username){
 				 html += "<div style='margin-top: 30px;'><img src='"+message.avatar+"' width='50' style='margin-top:5px; margin-left: 5px;'>";
 				 html += "<div><a style='font-size: 12pt;'>"+message.user+"</a></div>";
@@ -113,7 +116,7 @@
                             user: username,
                             time: new Date().getTime(),
                             room_id: "<%= room_id%>",
-                            avatar :"<% if (user.avatar){%><%= user.avatar%><%}else{ %>/images/none.png<% } %>"
+                            avatar :"<% if (user.avatar==null || user.avatar==undefined){%><%= user.avatar%><%}else{ %>/images/none.png<% } %>"
                         };
                         if (value) {
                             socket.emit("createMessage", message);
@@ -141,7 +144,7 @@
                     room_id: "<%= room_id%>",
                     to_user:to_user,
                     from_user: "<% if (user){%><%= user.username%><%}else{ %> <% } %>",
-                    avatar :"<% if (user.avatar){%><%= user.avatar%><%}else{ %>/images/none.png<% } %>"
+                    avatar :"<% if (user.avatar==null || user.avatar==undefined){%><%= user.avatar%><%}else{ %>/images/none.png<% } %>"
                 };
 
                 socket.emit("sayto",{message:message});
@@ -300,10 +303,10 @@
                 </div>
 
                 <div class="form-group form-inline">
-                    <label><img src="/images/facetitle.png" width="30" style="margin-left:10px;"/></label>
+                    <label style="display: inline;"><img src="/images/facetitle.png" width="30" style="margin-left:10px;"/>
                     <input required  style="width: 550px;" size="20" class="form-control message-input"
                            placeorder="Ctrl Enter to quick send">
-                    <button class="btn btn-primary" type="button">发送</button>
+                    <button class="btn btn-primary" type="button">发送</button></label>
                 </div>
             </div>
             <div class="container">
