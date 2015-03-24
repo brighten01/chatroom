@@ -116,7 +116,7 @@
                             user: username,
                             time: new Date().getTime(),
                             room_id: "<%= room_id%>",
-                            avatar :"<% if (user.avatar==null || user.avatar==undefined){%><%= user.avatar%><%}else{ %>/images/none.png<% } %>"
+                            avatar :"<%= avatar%>"
                         };
                         if (value) {
                             socket.emit("createMessage", message);
@@ -323,9 +323,9 @@
                             </div>
                         </li>
                     </ul>
-                </div><!-- /.todo -->
-            </div><!-- /.col-md-4 -->
-        </div><!-- /.row -->
+                </div>
+            </div>
+        </div>
     </div>
 
 

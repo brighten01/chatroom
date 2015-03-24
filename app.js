@@ -36,7 +36,6 @@ app.use(express.static(path.join(__dirname, "public")));
 var io = require("socket.io").listen(app.listen(port));
 // 设置socket.io 认证信息存储session
 var users = require("./models/user.js");
-
 var messages = [];
 var onlinUser = [];
 var clients = []; //根据用户区别不同的socket 客户端

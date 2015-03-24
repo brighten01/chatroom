@@ -125,6 +125,7 @@ module.exports = function (app) {
      */
     app.get("/logout", function (req, res) {
         req.session.user = null;
+        req.session.room_id = 0;
         res.redirect("/login");
     });
 
@@ -140,7 +141,11 @@ module.exports = function (app) {
             if (error) {
                 req.flash("error", "发生错误");
             }
+            var avatar = "/images/none.png";
             req.session.room_id = room_id;
+            if(req.session.user.avatar!=null || req.session.user.avatar!=="" || req.session.user.avatar!=undefined) {
+                avatar = req.session.user.avatar;
+            }
 
             if (room) {
                 res.render("message", {
@@ -149,8 +154,9 @@ module.exports = function (app) {
                     success: req.flash("success").toString(),
                     user: req.session.user,
                     room: name,
-                    room_id: room.room_id
-                });
+                    room_id: room.room_id,
+                    avatar:avatar
+            });
             } else {
                 //否则跳转
                 req.flash("error", "您请求的房间不存在");
@@ -212,7 +218,6 @@ module.exports = function (app) {
             if (error) {
                 req.flash("error", "房间列表载入出错" + error);
             }
-
             return res.render("roomlist", {
                 title: "房间里列表",
                 user: req.session.user,
