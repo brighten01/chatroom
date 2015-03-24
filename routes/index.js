@@ -145,9 +145,11 @@ module.exports = function (app) {
             req.session.room_id = room_id;
 
             if(req.session.user!=null || req.session.user!=="" || req.session.user!=undefined) {
-                avatar = req.session.user.avatar;
+                if(req.session.user.avatar==null){
+                    avatar = "/images/none.png";
+                }
             }
-
+            
             if (room) {
                 res.render("message", {
                     title: "房间" + name,
