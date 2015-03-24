@@ -47,25 +47,17 @@
         }
 
         var userhtml="";
-        function create_user_message(message){
+        function create_user_message(message) {
             var message = message.message;
-         //userhtml += "<div style='margin-top: 30px;'><img src='"+message.avatar+"' width='50' style='margin-top:5px; margin-left: 5px;'>";
-         //userhtml += "<div><a style='font-size: smaller '>"+message.user+"</a></div>";
-         //userhtml +='<div class="demo clearfix" style="margin-left: 15px;margin-top:-80px; ">';
-         //userhtml +='<span class="triangle">'+message.user+'</span>';
-         //userhtml +='<div class="article">'+message.content+'</div>';
-         //userhtml +=' </div>';
-         //userhtml +=' </div>';
-		 
-		 if(message.user==username){
-				 userhtml += "<div style='margin-top: 30px;'><img src='"+message.avatar+"' width='50' style='margin-top:5px; margin-left: 5px;'>";
-				 userhtml += "<div><a style='font-size: 12pt;'>"+message.user+"</a></div>";
-				 userhtml +='<div class="demo clearfix" style="margin-left: 15px;margin-top:-80px; ">';
-				 userhtml +='<span class="triangle">'+message.user+'</span>';
-				 userhtml +='<div class="article">'+message.content+'</div>';
-				 userhtml +=' </div>';
-				 userhtml +=' </div>';
-			}else{
+            if (message.user == username) {
+                userhtml += "<div style='margin-top: 30px;'><img src='" + message.avatar + "' width='50' style='margin-top:5px; margin-left: 5px;'>";
+                userhtml += "<div><a style='font-size: 12pt;'>" + message.user + "</a></div>";
+                userhtml += '<div class="demo clearfix" style="margin-left: 15px;margin-top:-80px; ">';
+                userhtml += '<span class="triangle">' + message.user + '</span>';
+                userhtml += '<div class="article">' + message.content + '</div>';
+                userhtml += ' </div>';
+                userhtml += ' </div>';
+            } else {
 				userhtml += "<div style='margin-top: 30px;'><img src='"+message.avatar+"' width='50' style='float:right;margin-top:15px; margin-left: 10px;'>";
 				userhtml +='<div class="demo clearfix fr" style="margin-right: 15px;margin-top:-20px; ">';
 				userhtml+='<span class="triangle right">'+message.user+'</span>';
@@ -74,8 +66,9 @@
 				userhtml+='	 </div>';
 				userhtml +=' </div>';
 			}
-           $(".dialog").html(userhtml);
-            if($(".dialog")[0].scrollHeight >$(".dialog").height()) {
+            
+            $(".dialog").html(userhtml);
+            if ($(".dialog")[0].scrollHeight > $(".dialog").height()) {
                 $(".dialog").scrollTop($(".dialog")[0].scrollHeight);
             }
         }
@@ -88,6 +81,26 @@
             }
         }
 
+        //  发送函数
+        function send_message(){
+            var value = $(".message-input").val();
+            $(".message-input").val('');
+            var message = {
+                content: value,
+                user: username,
+                time: new Date().getTime(),
+                room_id: "<%= room_id%>",
+                avatar :"<%= avatar%>"
+            };
+            if (value) {
+                socket.emit("createMessage", message);
+                value = "";
+                socket.on('error', function (data) {
+
+                });
+            }
+        }
+
         function showModalDialog(json) {
             to_user = json.username;
             $("#avatar").attr("src",json.avatar);
@@ -96,7 +109,12 @@
         }
         var ctrlDown = false;
         var messages;
+
         $(document).ready(function () {
+            $(".send_button").click(function () {
+                send_message();
+            });
+
             $(".message-input").bind("keydown", function (event) {
                 if (event.keyCode === 17) {
                     ctrlDown = true;
@@ -105,26 +123,11 @@
                     }, 1000);
                 }
 
-                if (event.keyCode === 13) {
+                if (event.keyCode === 13 ) {
                     if (ctrlDown) {
                         $(".message-input").val("");
                     } else {
-                        var value = $(".message-input").val();
-                        $(".message-input").val('');
-                        var message = {
-                            content: value,
-                            user: username,
-                            time: new Date().getTime(),
-                            room_id: "<%= room_id%>",
-                            avatar :"<%= avatar%>"
-                        };
-                        if (value) {
-                            socket.emit("createMessage", message);
-                            value = "";
-                            socket.on('error', function (data) {
-                                
-                            });
-                        }
+                        send_message();
                     }
                 }
             });
@@ -177,7 +180,6 @@
                         $("#welcome").remove();
                     },5000);
                 }
-
             });
             socket.on("connected", function (data) {
                 alert(data.message);
@@ -248,7 +250,6 @@
                 $("#disconnect").fadeOut(5000);
             });
 
-
         });
     </script>
 </head>
@@ -306,7 +307,7 @@
                     <label style="display: inline;"><img src="/images/facetitle.png" width="30" style="margin-left:10px;"/>
                     <input required  style="width: 550px;" size="20" class="form-control message-input"
                            placeorder="Ctrl Enter to quick send">
-                    <button class="btn btn-primary" type="button">发送</button></label>
+                    <button class="btn btn-primary send_button" type="button">发送</button></label>
                 </div>
             </div>
             <div class="container">
