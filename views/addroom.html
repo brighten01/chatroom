@@ -9,6 +9,40 @@
     <script language="javascript" src="/javascript/jquery.js"></script>
     <script language="javascript" src="/javascript/bootstrap.js"></script>
     <script language="javascript" src="/socket.io/socket.io.js"></script>
+    <script language="javascript" src="/socket.io/socket.io.js"></script>
+    <script language="javascript" src="/javascript/ajaxuploadfile.js"></script>
+
+    <script language="javascript">
+        $(function () {
+            var btnUpload = $('#uploadimg');
+            new AjaxUpload(btnUpload, {
+                action: '/uploadfile',
+                name: 'uploadfile',
+                onSubmit: function (file, ext) {
+                    if (!(ext && /^(jpg|png|jpeg|gif)$/.test(ext))) {
+                        window.parent.errortext();
+                        return false;
+                    }
+                },
+                onComplete: function (file, response) {
+                    console.log(response);
+                    eval("var t=" + response);
+                    var targetFile = t.targetFile.toString();
+                    if (response.error != null) {
+                        alert("上传错误" + response.error);
+                    } else {
+                        // 渲染页面
+                        $("#new_img_path").attr("src", targetFile);
+                        $("#fileUrl").val(targetFile);
+                    }
+                }
+            });
+
+            $("#register").click(function(){
+                $("#register_form").submit();
+            });
+        });
+    </script>
 </head>
 <div class="nav navbar-inverse navbar-fixed-top">
     <div class="container">
@@ -25,7 +59,12 @@
 
                 <li>
                     <% if (user){ %>
-                    <a class="navbar-brand"><span>欢迎回来</span> <span><%= user.username%></span></a>
+                    <a class="navbar-brand">
+                        <span>
+                        <img width="30xp;" src="<% if(user.avatar!=null){%><%= user.avatar%><%}else{%><img src='/images/none.png'><%}%>"></span>
+                        <span><%= user.username%></span>
+                        <a class="navbar-brand" href="/user/<%= user.username%>">修改资料</a>
+                    </a>
                     <a class="navbar-brand" href="/logout">退出</a>
                     <%}else{%>
                     <a class="navbar-brand">登录</a>
@@ -47,15 +86,31 @@
                         </td>
             </tr>
             <tr>
-                <Td>请输入房间名</Td>
+                <td>请输入房间名</td>
                 <td>
                     <input type="text" value="" name="name">
                 </td>
             </tr>
             <tr>
-                <Td colspan="3">
+                <td>房间简介</td>
+                <td>
+                    <textarea name="description"></textarea>
+                </td>
+            </tr>
+
+           <tr>
+                 <td>上传房间图片</td>
+                <td>
+
+                    <input type="file" id="uploadimg" style="margin-left:20px;" >
+                    <input type="hidden" value="" name="avatar" id="fileUrl">
+                    <img  src="/images/none.png" style="margin-left:20px;" id="new_img_path" width="150" >
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
                     <button class="btn btn-primary">添加房间</button>
-                </Td>
+                </td>
             </tr>
         </table>
     </form>

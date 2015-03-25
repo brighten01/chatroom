@@ -227,6 +227,14 @@
                 location.href = "/logout";
             });
 
+            //修改资料需要离开房间修改
+            $("#modify").click(function (){
+                if(confirm("您确认要离开房间修改资料么")){
+                    socket.emit("leave room", {username: "<% if (user){%><%= user.username%><%}else{ %> <% } %>",room_id:room_id});
+                    location.href = "/user/<%= user.username%>";
+                }
+            });
+
             /**
              * 已经退出聊天室
              */
@@ -291,8 +299,15 @@
 
                 <li>
                     <% if (user){ %>
-                    <a class="navbar-brand"><span>欢迎回来</span> <span><%= user.username%></span></a>
+                    <a class="navbar-brand">
+                        <span>
+                        <img width="30xp;" src="<% if(user.avatar!=null){%><%= user.avatar%><%}else{%><img src='/images/none.png'><%}%>"></span>
+                        <span><%= user.username%></span>
+                        <a class="navbar-brand" href="/user/<%= user.username%>">修改资料</a>
+
+                    </a>
                     <a class="navbar-brand" href="/system_message"> 系统消息</a>
+                    <a class="navbar-brand" id="modify" style="cursor: pointer">  修改资料</a>
                     <a class="navbar-brand" style="cursor:pointer" id="logout">退出</a>
                     <%}else{%>
                     <a class="navbar-brand" href="/login">登录</a>

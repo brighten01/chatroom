@@ -102,6 +102,7 @@ module.exports = function (app) {
     app.post("/login", checkNotLogin);
     app.post("/login", function (req, res) {
         var username = req.body.username;
+
         User.getOne(username, function (error, user) {
             if (error) {
                 req.flash("error", "出现错误" + error);
@@ -110,10 +111,8 @@ module.exports = function (app) {
 
             if (!user) {
                 req.flash("error", "此用户不存在");
-                res.redirect("back");
+                return res.redirect("back");
             }
-            //console.log('登录后信息');
-            //console.log(user);
             req.session.user = user;
             req.flash("success", "登录成功");
             res.redirect("/roomlist");
@@ -144,10 +143,10 @@ module.exports = function (app) {
             var avatar = "/images/none.png";
             req.session.room_id = room_id;
 
-            if(req.session.user!=null || req.session.user!=="" || req.session.user!=undefined) {
-                if(req.session.user.avatar==null){
+            if (req.session.user != null || req.session.user !== "" || req.session.user != undefined) {
+                if (req.session.user.avatar == null) {
                     avatar = "/images/none.png";
-                }else{
+                } else {
                     avatar = req.session.user.avatar
                 }
             }
@@ -160,8 +159,8 @@ module.exports = function (app) {
                     user: req.session.user,
                     room: name,
                     room_id: room.room_id,
-                    avatar:avatar
-            });
+                    avatar: avatar
+                });
             } else {
                 //否则跳转
                 req.flash("error", "您请求的房间不存在");
@@ -191,10 +190,11 @@ module.exports = function (app) {
     app.post("/addroom", function (req, res) {
         var name = req.body.name;
         var room_id = req.body.room_id;
-        var newRoom = new Room(name, room_id);
+        var avatar = req.body.avatar;
+        var description = req.body.description;
 
+        var newRoom = new Room(name, room_id,description,avatar);
         Room.getOne(name, function (error, room) {
-            console.log("房间信息");
             if (room) {
                 req.flash("error", "房间名已经存在");
                 return res.redirect('back');
@@ -219,6 +219,15 @@ module.exports = function (app) {
      */
     app.get("/roomlist", checkLogin);
     app.get("/roomlist", function (req, res) {
+        if(req.session.user==null){
+            return res.redirect("/login");
+        }
+        if(req.session.user.username){
+            username = req.session.user.username;
+        }else{
+            username = "";
+        }
+
         Room.getList(function (error, roomlist) {
             if (error) {
                 req.flash("error", "房间列表载入出错" + error);
@@ -229,7 +238,8 @@ module.exports = function (app) {
                 error: req.flash("error").toString(),
                 success: req.flash("success").toString(),
                 roomlist: roomlist,
-                room_id: req.session.room_id
+                room_id: req.session.room_id,
+                username : username
             });
         });
     });
@@ -308,6 +318,58 @@ module.exports = function (app) {
             res.redirect("/system_message");
         });
     });
+
+    //验证登录
+    app.get("/user/:name", checkLogin);
+
+    /**
+     * 修改用户资料
+     */
+    app.get("/user/:name", function (req, res) {
+        var name = req.params.name;
+        User.getOne(name, function (error, user) {
+            if (!user) {
+                return res.redirect("/roomlist");
+            } else {
+                return res.render("modify", {
+                    title: "修改资料",
+                    success: req.flash("success").toString(),
+                    error: req.flash("error").toString(),
+                    user: user
+                });
+            }
+        });
+    });
+
+    app.post("/user/:name", checkLogin);
+    app.post("/user/:name", function (req, res) {
+        var username = req.params.name;
+        var data = {
+            password: req.body.password,
+            email: req.body.email,
+            nickname: req.body.nickname,
+            avatar: req.body.avatar
+        };
+
+        User.modify(username, data, function (error, changed) {
+            if (error) {
+                req.flash("error", "修改失败");
+                return res.redirect("/");
+            }
+
+            //  密码修改
+            User.getOne(username, function (error, user) {
+                var new_password = req.body.password;
+                if (!new_password) {
+                    data.password = user.password;
+                }
+                req.flash("success", "修改成功");
+                res.redirect("/roomlist");
+            });
+        })
+
+    });
+
     /**
      * 未登录判断
      * @param req

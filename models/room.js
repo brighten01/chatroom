@@ -3,9 +3,13 @@
  * @type {exports}
  */
 var mongodb = require("./db.js");
-function Room(name,room_id) {
+
+function Room(name,room_id ,description ,avatar) {
+
     this.name = name;
     this.room_id = room_id;
+    this.decription = description;
+    this.avatar = avatar;
 }
 
 module.exports = Room;
@@ -17,8 +21,11 @@ Room.prototype.save = function (callback) {
     mongodb.close();
     var names = {
         name: this.name,
-        room_id:this.room_id
+        room_id:this.room_id,
+        description :  this.decription,
+        avatar : this.avatar
     }
+
     mongodb.open(function (error, db) {
         if (error) {
             mongodb.close();

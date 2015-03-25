@@ -134,8 +134,37 @@ User.updateOnline = function (username, room_id, callback) {
                 _self.getOnline(room_id,function (error, onlin_users) {
                     return callback(null, onlin_users);
                 });
-                //callback(null,doc);
 
+            });
+        });
+    });
+}
+
+/**
+ * 用户更改资料
+ * @param username 用户名
+ * @param data 数据
+ * @param callback 回调函数
+ */
+User.modify=function (username,data ,callback){
+    mongodb.close();
+    data.username = username;
+    mongodb.open(function (error,db){
+        if(error){
+            mongodb.close();
+            return callback(error);
+        }
+
+
+        db.collection("users",function (error,collection){
+            if(error){
+                callback(error);
+            }
+            collection.update({"username":username},{$set : data},function (error,changed){
+                if(error){
+                    callback(error);
+                }
+                callback(null,changed);
             });
         });
     });
