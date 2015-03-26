@@ -12,6 +12,7 @@
         "connect-mongo":"*",
         "connect-flash" :"*",
         "markdown":"*",
-		"connect":"< 2.6.0"
+		"connect":"< 2.6.0",
+        "redis": "*"
     }
 }
