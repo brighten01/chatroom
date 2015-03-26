@@ -5,6 +5,7 @@ function User(user) {
     this.password = user.password;
     this.username = user.username;
     this.avatar = user.avatar;
+    this.friend_username = "";
 }
 /**
  * 保存用户数据
@@ -72,7 +73,6 @@ User.getOnline = function (room_id, callback) {
             mongodb.close();
             return callback(error);
         }
-
         db.collection("users", function (error, collection) {
             collection.find({"room_id": room_id, "online": 1}).sort({"time": -1}).toArray(function (error, userlist) {
                 if (error) {
@@ -155,8 +155,7 @@ User.modify=function (username,data ,callback){
             return callback(error);
         }
 
-
-        db.collection("users",function (error,collection){
+     db.collection("users",function (error,collection){
             if(error){
                 callback(error);
             }
@@ -170,4 +169,32 @@ User.modify=function (username,data ,callback){
     });
 }
 
+
+/**
+ * 查找用户好友
+ * @param username 用户名
+ * @param callback 回调函数
+ * //todo 在线好友在在线列表中不显示显示在好友列表中
+ */
+User.findFriend =function (username,callback){
+    mongodb.close();
+    mongodb.open(function (error,db){
+        if(error){
+            mongodb.close();
+            return callback(error);
+        }
+
+        db.collection("users",function (error,collection){
+            if(error){
+                return callback(error);
+            }
+            collection.find({friend_username:username}).sort({time:"-1"}).toArray(function(error,docs){
+                if(error){
+                    callback(error);
+                }
+                callback(null,docs);
+            });
+        })
+    });
+}
 module.exports = User;

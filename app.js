@@ -60,15 +60,15 @@ io.sockets.on("connection", function (socket) {
     });
 
 
-    socket.on("show system message",function(data){
-       if(data.roomid!=''){
-           socket.join(data.roomid);
-           io.sockets.in(data.roomid).emit("system message",{message:data.message});
-        }else{
-           socket.leave(data.room_id);
-           socket.emit("system message",{message:data.message});
-       }
-   });
+    socket.on("show system message", function (data) {
+        if (data.roomid != '') {
+            socket.join(data.roomid);
+            io.sockets.in(data.roomid).emit("system message", {message: data.message});
+        } else {
+            socket.leave(data.room_id);
+            socket.emit("system message", {message: data.message});
+        }
+    });
     /**
      * 设置房间
      */
@@ -91,7 +91,7 @@ io.sockets.on("connection", function (socket) {
         socket.join(data.room_id);
         onlinUser.splice(onlinUser.indexOf(data.username), 1);
         //延迟发送
-        users.deleteOnline(data.username, data.room_id ,function (error, online_users) {
+        users.deleteOnline(data.username, data.room_id, function (error, online_users) {
             if (error) {
                 console.log(error);
                 return false;
@@ -111,20 +111,23 @@ io.sockets.on("connection", function (socket) {
         // 推送在线用户
         socket.join(data.room_id);
         clients[data.username] = socket;
-        users.getOnline(data.room_id,function (error, online_users) {
+        users.getOnline(data.room_id, function (error, online_users) {
             if (error) {
                 console.log(error);
                 return false;
             }
-            io.sockets.in(data.room_id).emit("user_online_detail",{data:online_users});
+            io.sockets.in(data.room_id).emit("user_online_detail", {data: online_users});
         });
 
         if (onlinUser.length > 0) {
             var flag = checkdata.find(onlinUser, data.username);
             if (flag == false) {
                 onlinUser.push(data.username);
-                io.sockets.in(data.room_id).emit("login user", {message: "欢迎 " + data.username + " 进入房间 ",username:data.username});
-                users.updateOnline(data.username, data.room_id ,function (error, online_users) {
+                io.sockets.in(data.room_id).emit("login user", {
+                    message: "欢迎 " + data.username + " 进入房间 ",
+                    username: data.username
+                });
+                users.updateOnline(data.username, data.room_id, function (error, online_users) {
                     if (error) {
                         console.log(error);
                         return false;
@@ -137,8 +140,11 @@ io.sockets.on("connection", function (socket) {
         } else if (onlinUser == undefined || onlinUser.length == 0) {
             onlinUser.push(data.username);
             socket.emit("onlineuser", {data: onlinUser});
-            io.sockets.in(data.room_id).emit("login user", {message: "欢迎 " + data.username + " 进入房间 ",username:data.username});
-            users.updateOnline(data.username, data.room_id ,function (error, online_users) {
+            io.sockets.in(data.room_id).emit("login user", {
+                message: "欢迎 " + data.username + " 进入房间 ",
+                username: data.username
+            });
+            users.updateOnline(data.username, data.room_id, function (error, online_users) {
                 if (error) {
                     console.log(error);
                     return false;
@@ -155,7 +161,6 @@ io.sockets.on("connection", function (socket) {
         socket.join(data.room_id);
         var from_user = data.message.from_user;
         var to_user = data.message.to_user;
-
         setTimeout(function () {
             clients[from_user].emit("say", {message: data});
             clients[to_user].emit("say", {message: data});
