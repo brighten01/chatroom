@@ -130,19 +130,23 @@ module.exports = function (app) {
 
     /**
      * 进入某个房间页面 并且判断是否登录
+     * 取得用户好友关系
+     *
      */
     app.get("/room/:name", checkLogin);
     app.get("/room/:name", function (req, res) {
         var name = req.params.name;
         var room_id = 0;
         var newRoom = new Room(name);
+        if(req.session.user==null){
+            return res.redirect("/login");
+        }
         Room.getOne(name, function (error, room) {
             if (error) {
                 req.flash("error", "发生错误");
             }
             var avatar = "/images/none.png";
             req.session.room_id = room_id;
-
             if (req.session.user != null || req.session.user !== "" || req.session.user != undefined) {
                 if (req.session.user.avatar == null) {
                     avatar = "/images/none.png";
@@ -152,15 +156,39 @@ module.exports = function (app) {
             }
 
             if (room) {
-                res.render("message", {
-                    title: "房间" + name,
-                    error: req.flash("error").toString(),
-                    success: req.flash("success").toString(),
-                    user: req.session.user,
-                    room: name,
-                    room_id: room.room_id,
-                    avatar: avatar
-                });
+                if(req.session.user.username!=null){
+                   //取用户好友关系
+                    User.findRelations(req.session.user.username,function(error,result){
+                        if(result !=undefined || result==null) {
+                            var friendlist =result;
+                        }else{
+                            var friendlist = null;
+                        }
+
+                        res.render("message", {
+                            title: "房间" + name,
+                            error: req.flash("error").toString(),
+                            success: req.flash("success").toString(),
+                            user: req.session.user,
+                            room: name,
+                            room_id: room.room_id,
+                            avatar: avatar,
+                            friend_list : friendlist
+                        });
+                    });
+                }else{
+                    res.render("message", {
+                        title: "房间" + name,
+                        error: req.flash("error").toString(),
+                        success: req.flash("success").toString(),
+                        user: req.session.user,
+                        room: name,
+                        room_id: room.room_id,
+                        avatar: avatar,
+                        friend_list: null
+                    });
+                }
+
             } else {
                 //否则跳转
                 req.flash("error", "您请求的房间不存在");
@@ -264,7 +292,7 @@ module.exports = function (app) {
         file.createDir(uploadImagePath, "777", function (result) {
             if (req.files.uploadfile.path != '') {
                 file.saveFile(req.files.uploadfile.path, newImagePath, function (result) {
-                    ;
+
                     if (result == true) {
                         res.send('{success:"成功上传文件",targetFile:"' + staticImagePath + '",error:""}');
                     } else {

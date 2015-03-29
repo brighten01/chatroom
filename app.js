@@ -40,6 +40,7 @@ var messages = [];
 var onlinUser = [];
 var clients = []; //根据用户区别不同的socket 客户端
 var room_message = [];
+var addclients = [];
 io.sockets.on("connection", function (socket) {
 
     socket.on("getAllMessages", function (data) {
@@ -111,7 +112,8 @@ io.sockets.on("connection", function (socket) {
         // 推送在线用户
         socket.join(data.room_id);
         clients[data.username] = socket;
-        users.getOnline(data.room_id, function (error, online_users) {
+
+        users.getOnline(data.room_id , data.username , function (error, online_users) {
             if (error) {
                 console.log(error);
                 return false;
@@ -165,6 +167,24 @@ io.sockets.on("connection", function (socket) {
             clients[from_user].emit("say", {message: data});
             clients[to_user].emit("say", {message: data});
         }, 100);
+    });
+
+    socket.on("add user",function(data){
+        //广播给对方
+        users.addRelations(data.username,data.friendUser,data.isconfirm ,data.is_refuse, data.reason,function (error,relation){
+            if(error) {
+                console.log("添加好友失败" + error);
+            }
+
+            addclients[data.friend_user] = socket;
+            setTimeout(function (){
+                console.log(data);
+                if(clients[data.friend_user]){
+                    clients[data.friend_user].emit("user add message",{message:"给你发的好友消息"});
+                }
+            },1000);
+
+        });
     });
 
 });

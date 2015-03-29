@@ -16,6 +16,7 @@
         var room_id = "<%= room_id%>";
         var to_user ="";
         var html ="";
+        var friend_list = "<%= friend_list%>";
         var username = "<% if (user){%><%= user.username%><%}else{ %> <% } %>";
         function createhtml(message) {
             if(message.avatar==undefined || message.avatar==null ||message.avatar==""){
@@ -109,6 +110,21 @@
             $("#myModal").modal();
         }
 
+
+        // 查找好友关系
+        function is_friend(username){
+            if(friend_list != null){
+                for(var k=0;k<friend_list.length;k++){
+                    if(friend_list[i].friendUser==username){
+                        return true;
+                    }else{
+                        return false ;
+                    }
+                }
+            }else{
+                return true;
+            }
+        }
         function replace_em(str){
             str = str.replace(/\</g,'&lt;');
             str = str.replace(/\>/g,'&gt;');
@@ -116,6 +132,17 @@
             str = str.replace(/\[em_([0-9]*)\]/g,'<img src="/images/looks/$1.gif" border="0" />');
             return str;
         }
+
+        function adduser(friend_user){
+            socket.emit("add user",{friend_user:friend_user});
+//            socket.emit("add user",{username:username,friendUser:friend_user,isconfirm:0,isrefuse:0});
+        }
+
+        //好友请求消息
+        socket.on("user add message",function (data){
+            var add_user_message=  "<a id=\"show_user_message\" style='cursor: pointer'>您有系统消息</a>";
+            $(".user_message").html(add_user_message);
+        });
 
         var ctrlDown = false;
         var messages;
@@ -252,6 +279,8 @@
                 $(".messages").append(leave_sys_msg);
                 $("#leave_system").fadeOut(5000);
             });
+
+
             // 在线用户
             socket.on("user_online_detail", function (data) {
                 var  userdata = data.data;
@@ -262,11 +291,25 @@
                     }
                     var namedata = new Object();
                     namedata = JSON.stringify(userdata[i]);
-                    onlineusers += "<li><a class='showdialog' style='cursor: pointer;' onclick='javascript:showModalDialog("+namedata+");'><img src='" + userdata[i].avatar + "' width='45'>&nbsp;" + userdata[i].username + "</a></span></li>";
+                    //是否是好友关系
+                    var isfriend = is_friend(userdata[i].username);
+                    //如果是自己则不现实加好友操作
+                    if(!isfriend && userdata[i].username != username){
+                        var join = "<a  onclick=\"adduser('"+userdata[i].username+"')\" class=\"adduser btn btn-primary btn-xs \"  data-user=\""+userdata[i].username+"\">加好友</a>";
+                    }else{
+                        var join= "";
+                    }
+                    onlineusers += "<li><a class='showdialog' style='cursor: pointer;' onclick='javascript:showModalDialog(" + namedata + ");'><img src='" + userdata[i].avatar + "' width='45'>&nbsp;" + userdata[i].username + "</a></span>"+join+"</li>";
                 }
                 $(".userlist").html(onlineusers);
             });
 
+            //添加好友
+
+            $("#show_user_message").click(function(){
+                $("#add_friend").modal();
+                $("#add_friendlist").modal();
+            });
             //断开连接
             socket.on('reconnect',function(){
                 var msg = '<div id="reconnect" style="color:#f00">您已经重新连接服务器</div>';
@@ -303,11 +346,12 @@
                         <span>
                         <img width="30xp;" src="<% if(user.avatar!=null){%><%= user.avatar%><%}else{%><img src='/images/none.png'><%}%>"></span>
                         <span><%= user.username%></span>
-                        <a class="navbar-brand" href="/user/<%= user.username%>">修改资料</a>
-
+                        <a class="navbar-brand user_message" ></a>
                     </a>
+
                     <a class="navbar-brand" href="/system_message"> 系统消息</a>
                     <a class="navbar-brand" id="modify" style="cursor: pointer">  修改资料</a>
+
                     <a class="navbar-brand" style="cursor:pointer" id="logout">退出</a>
                     <%}else{%>
                     <a class="navbar-brand" href="/login">登录</a>
@@ -511,7 +555,7 @@
         </div>
     </div>
 
-
+    <!--单个好友请求确认-->
     <div class="modal" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -536,10 +580,36 @@
             </div>
         </div>
     </div>
+
+    <!--消息列表-->
+    <div class="modal" id="add_friendlist" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                     brighten2004  请求加您为好友
+                </div>
+                <div class="modal-body">
+                    <button class="btn btn-xs btn-primary" >同意</button>
+                    <button class="btn btn-xs btn-primary"  id="refuse">拒绝</button>
+                </div>
+                <div class="modal-footer">
+                    <div class="form-group">
+                        <textarea id="refuse_reson"  class="form-control" ></textarea>
+                    </div>
+                    <button type="button" class="btn  btn-primary btn-sm" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn  btn-primary btn-sm sendmessage">发送</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 </div>
+
 <!--[if IE ]>
 <script language="javascript">
-    $(".message_send").css("margin-right","300px");
+    $(".message_send").css("margin-right","300px");s
+
 </script>
 <![endif]-->
 </body>
