@@ -243,17 +243,28 @@ User.addRelations  =function (username,friendUser,isconfirm ,is_refuse, reason ,
             if(error){
                 callback(error);
             }
-            //如果有则不插入
             _self.findFriend(username,friendUser,function (error,doc){
                  if(!doc){
                      collection.insert(relationship,function (error,doc){
                          if(error){
                              callback(error);
                          }
-                         callback(null,doc);
+                         //查找好友未确认的关系
+                         _self.findRelations(username,function (error,relationship){
+                             if(error){
+                                 callback(error);
+                             }
+                               return callback(null,relationship);
+                         });
+
                      });
                  }else{
-                     callback(null,doc);
+                     _self.findRelations(username,function (error,relationship){
+                         if(error){
+                             callback(error);
+                         }
+                         return callback(null,relationship);
+                     });
                  }
 
             });
@@ -314,6 +325,7 @@ User.findRelations = function (username,callback){
         });
     });
 }
+
 /**
  *  查找好友关系
  * @param username
@@ -341,4 +353,34 @@ User.isFriend = function (username ,friendUser ,callback){
     });
 }
 
+
+/**
+ * 更新好友关系 拒绝或者同意
+ * @param username
+ * @param friendUser
+ * @param callback
+ */
+User.updatRelations = function (username ,friendUser,isrefuse , reason , callback){
+    mongodb.close();
+    mongodb.open(function (error,db){
+        if(error){
+            mongodb.close();
+            return callback(error);
+        }
+        db.collection(function (error,collection){
+            if(error){
+              callback(error);
+            }
+            /**
+             * 更新好友关系
+             */
+            collection.update({"username": username,"friendUser":friendUser},{$set: {isconfirm:1,reason:reason,is_refuse:isrefuse}},function (error,isrelation){
+                if(error){
+                    callback("更新失败"+error,isrelation);
+                }
+                callback(null ,isrelation);
+            });
+        });
+    });
+};
 module.exports = User;

@@ -115,7 +115,7 @@
         function is_friend(username){
             if(friend_list != null){
                 for(var k=0;k<friend_list.length;k++){
-                    if(friend_list[i].friendUser==username){
+                    if(friend_list[k].friendUser==username){
                         return true;
                     }else{
                         return false ;
@@ -133,21 +133,56 @@
             return str;
         }
 
+        // 添加好友
         function adduser(friend_user){
-            socket.emit("add user",{friend_user:friend_user});
-//            socket.emit("add user",{username:username,friendUser:friend_user,isconfirm:0,isrefuse:0});
+            socket.emit("add user",{username:username,friendUser:friend_user,isconfirm:0,isrefuse:0});
+            $(".adduser").html("<a>已发送</a>");
         }
-
         //好友请求消息
         socket.on("user add message",function (data){
-            var add_user_message=  "<a id=\"show_user_message\" style='cursor: pointer'>您有系统消息</a>";
+            var add_message = "<div  class='nav'>";
+            for(var i=0; i< data.length;i++){
+                add_message  += "<ul style='list-style: none;'>";
+                add_message  += "<li>"+data[i].username+"请求加您好为好友</li>";
+                add_message  += "<li><label><input type=\"radio\" name=\"user_add\" class=\"accept\"  onclick=\"aggree('"+data[i].username+"','"+data[i].friendUser+"')\">接受</label> " ;
+                add_message  += "<label><input type=\"radio\" name=\"user_add\" class=\"refuse\" onclick=\"refuse('"+data[i].username+"','"+data[i].friendUser+"')\">拒绝</label></li>";
+                add_message  += "</ul>";
+            }
+            add_message += "</div>";
+            //添加html
+            $(".friend_message").html( add_message);
+            var add_user_data =   JSON.stringify(data);
+            var add_user_message=  "<a id=\"show_user_message\" onclick=\"show_message()\" style='cursor: pointer'>您有系统消息</a>";
+            // 初始化消息列表
             $(".user_message").html(add_user_message);
         });
 
+        //显示消息
+        function show_message(){
+           $("#add_friendlist").modal();
+        }
+
+        // 拒绝请求
+        function refuse(username ,friendUser){
+            $(".reason").show();
+            $(".aggree").hide();
+            //拒绝发送
+            var reason = $(".reason").val()!=' '? $(".reason").val() : null;
+            socket.emit("refuse request" ,{username:friendUser , friendUser:username,isrefuse : 1});
+        }
+        // 同意请求
+        function aggree(username ,friendUser){
+            $(".reason").hide();
+            $(".aggree").show();
+            //确认发送
+            socket.emit("aggree request" ,{username:friendUser , friendUser:username,isrefuse:0});
+        }
         var ctrlDown = false;
         var messages;
         var alt = "";
+
         $(document).ready(function () {
+
             $(".send_button").click(function () {
                 send_message();
             });
@@ -155,6 +190,7 @@
                 $(".message-input")[0].value +=$(this).attr("title");
             });
             $(".expression").hide();
+
             //表情
             $("#face").click(function () {
                 if ($(".expression").is(":hidden")) {
@@ -586,18 +622,20 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                     brighten2004  请求加您为好友
+                    <h3>好友请求</h3>
                 </div>
-                <div class="modal-body">
-                    <button class="btn btn-xs btn-primary" >同意</button>
-                    <button class="btn btn-xs btn-primary"  id="refuse">拒绝</button>
+                <div class="modal-body" >
+                    <div class="friend_message">
+                     </div>
                 </div>
                 <div class="modal-footer">
-                    <div class="form-group">
-                        <textarea id="refuse_reson"  class="form-control" ></textarea>
+                    <div class="form-group aggree" style="display: none;">
+                        <button class="btn btn-xs btn-primary"> 接受请求</button>
                     </div>
-                    <button type="button" class="btn  btn-primary btn-sm" data-dismiss="modal">关闭</button>
-                    <button type="button" class="btn  btn-primary btn-sm sendmessage">发送</button>
+                    <div class="form-group">
+                        <textarea id="refuse_reson"  class="form-control reason" style="display: none;" ></textarea>
+                        <button type="button" class="btn  btn-primary btn-sm refuse_reason" data-dismiss="modal">拒绝</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -608,7 +646,7 @@
 
 <!--[if IE ]>
 <script language="javascript">
-    $(".message_send").css("margin-right","300px");s
+    $(".message_send").css("margin-right","300px");
 
 </script>
 <![endif]-->

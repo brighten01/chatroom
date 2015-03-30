@@ -171,22 +171,28 @@ io.sockets.on("connection", function (socket) {
 
     socket.on("add user",function(data){
         //广播给对方
-        users.addRelations(data.username,data.friendUser,data.isconfirm ,data.is_refuse, data.reason,function (error,relation){
+        users.addRelations(data.username,data.friendUser,data.isconfirm ,data.isrefuse, data.reason,function (error,relations){
             if(error) {
                 console.log("添加好友失败" + error);
             }
-
-            addclients[data.friend_user] = socket;
+            addclients[data.friendUser] = socket;
             setTimeout(function (){
-                console.log(data);
-                if(clients[data.friend_user]){
-                    clients[data.friend_user].emit("user add message",{message:"给你发的好友消息"});
+                if(clients[data.friendUser]){
+                    clients[data.friendUser].emit("user add message",relations);
                 }
             },1000);
-
         });
     });
 
+    //同意请求
+    socket.on("aggree request",function (data){
+        console.log(data);
+    });
+
+    //拒绝请求
+    socket.on("refuse request",function (data){
+        console.log(data);
+    });
 });
 
 routes(app);
