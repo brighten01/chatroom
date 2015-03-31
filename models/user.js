@@ -223,7 +223,7 @@ User.findFriend =function (username,friendUser,callback){
  * @param reason
  * @param callback
  */
-User.addRelations  =function (username,friendUser,isconfirm ,is_refuse, reason , callback) {
+User.addRelations  = function (username,friendUser,isconfirm ,is_refuse, reason , callback) {
     mongodb.close();
     var _self = this;
      var relationship = {
@@ -250,19 +250,23 @@ User.addRelations  =function (username,friendUser,isconfirm ,is_refuse, reason ,
                              callback(error);
                          }
                          //查找好友未确认的关系
-                         _self.findRelations(username,function (error,relationship){
+
+                         _self.findRelations(friendUser,function (error,relationship){
                              if(error){
                                  callback(error);
                              }
-                               return callback(null,relationship);
+
+                             return callback(null,relationship);
                          });
 
                      });
-                 }else{
-                     _self.findRelations(username,function (error,relationship){
+                 } else {
+
+                     _self.findRelations(friendUser,function (error,relationship){
                          if(error){
                              callback(error);
                          }
+
                          return callback(null,relationship);
                      });
                  }
@@ -315,7 +319,7 @@ User.findRelations = function (username,callback){
             if(error){
                 callback(error);
             }
-            collection.find({"friendUser":username ,"isconfirm":0}).sort({time:-1}).toArray(function (error,docs){
+            collection.find({"username":username ,"isconfirm":0}).sort({time:-1}).toArray(function (error,docs){
                 if(error){
                     return callback(error);
                 }
@@ -367,14 +371,14 @@ User.updatRelations = function (username ,friendUser,isrefuse , reason , callbac
             mongodb.close();
             return callback(error);
         }
-        db.collection(function (error,collection){
+        db.collection("relationship",function (error,collection){
             if(error){
               callback(error);
             }
             /**
              * 更新好友关系
              */
-            collection.update({"username": username,"friendUser":friendUser},{$set: {isconfirm:1,reason:reason,is_refuse:isrefuse}},function (error,isrelation){
+            collection.update({$all:[{"username": username,"friendUser":friendUser},{"friendUser":username,"username":friendUser}]},{$set: {isconfirm:1,reason:reason,is_refuse:isrefuse}},function (error,isrelation){
                 if(error){
                     callback("更新失败"+error,isrelation);
                 }

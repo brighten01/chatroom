@@ -175,23 +175,24 @@ io.sockets.on("connection", function (socket) {
             if(error) {
                 console.log("添加好友失败" + error);
             }
-            addclients[data.friendUser] = socket;
-            setTimeout(function (){
-                if(clients[data.friendUser]){
-                    clients[data.friendUser].emit("user add message",relations);
-                }
-            },1000);
+            clients[data.friendUser].emit("user add message",relations);
         });
     });
 
     //同意请求
     socket.on("aggree request",function (data){
-        console.log(data);
+        //console.log(data);
+       var  reason = null;
+        users.updatRelations(data.username,data.friendUser,data.isrefuse,data.reason,function (error,result){
+            console.log("当前用户",data.username);
+            console.log("好友",data.friendUser);
+            console.log(result);
+        });
     });
 
     //拒绝请求
     socket.on("refuse request",function (data){
-        console.log(data);
+        //console.log(data);
     });
 });
 

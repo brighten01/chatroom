@@ -136,14 +136,14 @@
         // 添加好友
         function adduser(friend_user){
             socket.emit("add user",{username:username,friendUser:friend_user,isconfirm:0,isrefuse:0});
-            $(".adduser").html("<a>已发送</a>");
+//            $(".adduser").html("<a>已发送</a>");
         }
         //好友请求消息
         socket.on("user add message",function (data){
             var add_message = "<div  class='nav'>";
             for(var i=0; i< data.length;i++){
                 add_message  += "<ul style='list-style: none;'>";
-                add_message  += "<li>"+data[i].username+"请求加您好为好友</li>";
+                add_message  += "<li>"+data[i].friendUser+"请求加您好为好友</li>";
                 add_message  += "<li><label><input type=\"radio\" name=\"user_add\" class=\"accept\"  onclick=\"aggree('"+data[i].username+"','"+data[i].friendUser+"')\">接受</label> " ;
                 add_message  += "<label><input type=\"radio\" name=\"user_add\" class=\"refuse\" onclick=\"refuse('"+data[i].username+"','"+data[i].friendUser+"')\">拒绝</label></li>";
                 add_message  += "</ul>";
@@ -166,23 +166,32 @@
         function refuse(username ,friendUser){
             $(".reason").show();
             $(".aggree").hide();
-            //拒绝发送
+            $(".refuse_reason").show();
+            $("#friendUser").val(friendUser);
             var reason = $(".reason").val()!=' '? $(".reason").val() : null;
-            socket.emit("refuse request" ,{username:friendUser , friendUser:username,isrefuse : 1});
+//            socket.emit("refuse request" ,{username:friendUser , friendUser:username,isrefuse : 1,isconfirm:1});
         }
+
         // 同意请求
         function aggree(username ,friendUser){
             $(".reason").hide();
             $(".aggree").show();
             //确认发送
-            socket.emit("aggree request" ,{username:friendUser , friendUser:username,isrefuse:0});
+            $("#friendUser").val(friendUser);
+            socket.emit("aggree request" ,{username:friendUser , friendUser:username,isrefuse:0,isconfirm:1});
+        }
+
+        function aggree_request(){
+            var username = $("#current_user").val();
+            var friendUser = $("#friendUser").val();
+            socket.emit("aggree request",{username:username,friendUser:friendUser,isrefuse:0,reason:null});
         }
         var ctrlDown = false;
         var messages;
         var alt = "";
 
         $(document).ready(function () {
-
+            $(".todo-done >li").removeAttr("background");
             $(".send_button").click(function () {
                 send_message();
             });
@@ -359,6 +368,7 @@
                 $("#disconnect").fadeOut(5000);
             });
 
+
         });
     </script>
 </head>
@@ -427,149 +437,150 @@
                     <button class="btn btn-primary send_button" type="button">发送</button></label>
                 </div>
 
-                <div  class="container expression" style="overflow-y:scroll;width: 660px;">
-                    <div class="list-div"><a class="click_face" title="[em_1]"><img src="/images/looks/1.gif"></a></div>
-                    <div class="list-div"><a class="click_face" title="[em_2]"><img src="/images/looks/2.gif"></a></div>
-                    <div class="list-div"><a class="click_face" title="[em_3]"><img src="/images/looks/3.gif"></a></div>
-                    <div class="list-div"><a class="click_face" title="[em_4]"><img src="/images/looks/4.gif"></a></div>
-                    <div class="list-div"><a class="click_face" title="[em_5]"><img src="/images/looks/5.gif"></a></div>
-                    <div class="list-div"><a class="click_face" title="[em_6]"><img src="/images/looks/6.gif"></a></div>
-                    <div class="list-div"><a class="click_face" title="[em_7]"><img src="/images/looks/7.gif"></a></div>
-                    <div class="list-div"><a class="click_face" title="[em_8]"><img src="/images/looks/8.gif"></a></div>
-                    <div class="list-div"><a class="click_face" title="[em_9]"><img src="/images/looks/9.gif"></a></div>
-                    <div class="list-div"><a class="click_face" title="[em_10]"><img src="/images/looks/10.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_11]"><img src="/images/looks/11.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_12]"><img src="/images/looks/12.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_13]"><img src="/images/looks/13.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_14]"><img src="/images/looks/14.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_15]"><img src="/images/looks/15.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_16]"><img src="/images/looks/16.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_17]"><img src="/images/looks/17.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_18]"><img src="/images/looks/18.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_19]"><img src="/images/looks/19.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_20]"><img src="/images/looks/20.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_21]"><img src="/images/looks/21.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_22]"><img src="/images/looks/22.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_23]"><img src="/images/looks/23.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_24]"><img src="/images/looks/24.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_25]"><img src="/images/looks/25.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_26]"><img src="/images/looks/26.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_27]"><img src="/images/looks/27.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_28]"><img src="/images/looks/28.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_29]"><img src="/images/looks/29.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_30]"><img src="/images/looks/30.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_31]"><img src="/images/looks/31.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_32]"><img src="/images/looks/32.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_33]"><img src="/images/looks/33.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_34]"><img src="/images/looks/34.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_35]"><img src="/images/looks/35.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_36]"><img src="/images/looks/36.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_37]"><img src="/images/looks/37.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_38]"><img src="/images/looks/38.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_39]"><img src="/images/looks/39.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_40]"><img src="/images/looks/40.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_41]"><img src="/images/looks/41.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_42]"><img src="/images/looks/42.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_43]"><img src="/images/looks/43.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_44]"><img src="/images/looks/44.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_45]"><img src="/images/looks/45.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_46]"><img src="/images/looks/46.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_47]"><img src="/images/looks/47.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_48]"><img src="/images/looks/48.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_49]"><img src="/images/looks/49.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_50]"><img src="/images/looks/50.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_51]"><img src="/images/looks/51.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_52]"><img src="/images/looks/52.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_53]"><img src="/images/looks/53.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_54]"><img src="/images/looks/54.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_55]"><img src="/images/looks/55.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_56]"><img src="/images/looks/56.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_57]"><img src="/images/looks/57.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_58]"><img src="/images/looks/58.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_59]"><img src="/images/looks/59.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_60]"><img src="/images/looks/60.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_61]"><img src="/images/looks/61.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_62]"><img src="/images/looks/62.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_63]"><img src="/images/looks/63.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_64]"><img src="/images/looks/64.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_65]"><img src="/images/looks/65.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_66]"><img src="/images/looks/66.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_67]"><img src="/images/looks/67.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_68]"><img src="/images/looks/68.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_69]"><img src="/images/looks/69.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_70]"><img src="/images/looks/70.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_71]"><img src="/images/looks/71.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_72]"><img src="/images/looks/72.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_73]"><img src="/images/looks/73.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_74]"><img src="/images/looks/74.gif"></a>
-                    </div>
-                    <div class="list-div"><a class="click_face" title="[em_75]"><img src="/images/looks/75.gif"></a>
-                    </div>
-                </div>
+
+          <div  class="container expression" style="overflow-y:scroll;width: 660px;">
+    <div class="list-div"><a class="click_face" title="[em_1]"><img src="/images/looks/1.gif"></a></div>
+    <div class="list-div"><a class="click_face" title="[em_2]"><img src="/images/looks/2.gif"></a></div>
+    <div class="list-div"><a class="click_face" title="[em_3]"><img src="/images/looks/3.gif"></a></div>
+    <div class="list-div"><a class="click_face" title="[em_4]"><img src="/images/looks/4.gif"></a></div>
+    <div class="list-div"><a class="click_face" title="[em_5]"><img src="/images/looks/5.gif"></a></div>
+    <div class="list-div"><a class="click_face" title="[em_6]"><img src="/images/looks/6.gif"></a></div>
+    <div class="list-div"><a class="click_face" title="[em_7]"><img src="/images/looks/7.gif"></a></div>
+    <div class="list-div"><a class="click_face" title="[em_8]"><img src="/images/looks/8.gif"></a></div>
+    <div class="list-div"><a class="click_face" title="[em_9]"><img src="/images/looks/9.gif"></a></div>
+    <div class="list-div"><a class="click_face" title="[em_10]"><img src="/images/looks/10.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_11]"><img src="/images/looks/11.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_12]"><img src="/images/looks/12.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_13]"><img src="/images/looks/13.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_14]"><img src="/images/looks/14.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_15]"><img src="/images/looks/15.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_16]"><img src="/images/looks/16.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_17]"><img src="/images/looks/17.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_18]"><img src="/images/looks/18.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_19]"><img src="/images/looks/19.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_20]"><img src="/images/looks/20.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_21]"><img src="/images/looks/21.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_22]"><img src="/images/looks/22.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_23]"><img src="/images/looks/23.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_24]"><img src="/images/looks/24.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_25]"><img src="/images/looks/25.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_26]"><img src="/images/looks/26.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_27]"><img src="/images/looks/27.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_28]"><img src="/images/looks/28.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_29]"><img src="/images/looks/29.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_30]"><img src="/images/looks/30.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_31]"><img src="/images/looks/31.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_32]"><img src="/images/looks/32.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_33]"><img src="/images/looks/33.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_34]"><img src="/images/looks/34.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_35]"><img src="/images/looks/35.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_36]"><img src="/images/looks/36.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_37]"><img src="/images/looks/37.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_38]"><img src="/images/looks/38.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_39]"><img src="/images/looks/39.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_40]"><img src="/images/looks/40.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_41]"><img src="/images/looks/41.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_42]"><img src="/images/looks/42.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_43]"><img src="/images/looks/43.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_44]"><img src="/images/looks/44.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_45]"><img src="/images/looks/45.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_46]"><img src="/images/looks/46.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_47]"><img src="/images/looks/47.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_48]"><img src="/images/looks/48.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_49]"><img src="/images/looks/49.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_50]"><img src="/images/looks/50.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_51]"><img src="/images/looks/51.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_52]"><img src="/images/looks/52.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_53]"><img src="/images/looks/53.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_54]"><img src="/images/looks/54.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_55]"><img src="/images/looks/55.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_56]"><img src="/images/looks/56.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_57]"><img src="/images/looks/57.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_58]"><img src="/images/looks/58.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_59]"><img src="/images/looks/59.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_60]"><img src="/images/looks/60.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_61]"><img src="/images/looks/61.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_62]"><img src="/images/looks/62.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_63]"><img src="/images/looks/63.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_64]"><img src="/images/looks/64.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_65]"><img src="/images/looks/65.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_66]"><img src="/images/looks/66.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_67]"><img src="/images/looks/67.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_68]"><img src="/images/looks/68.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_69]"><img src="/images/looks/69.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_70]"><img src="/images/looks/70.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_71]"><img src="/images/looks/71.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_72]"><img src="/images/looks/72.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_73]"><img src="/images/looks/73.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_74]"><img src="/images/looks/74.gif"></a>
+    </div>
+    <div class="list-div"><a class="click_face" title="[em_75]"><img src="/images/looks/75.gif"></a>
+    </div>
+</div>
             </div>
 
             <div class="container">
@@ -607,6 +618,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
+
                     <div class="form-group">
                         <textarea id="usercontent" class="form-control"></textarea>
                     </div>
@@ -629,12 +641,14 @@
                      </div>
                 </div>
                 <div class="modal-footer">
+                    <input type="hidden" value="<% if (user){%><%= user.username%><%}else{ %> <% } %>" name="username"  id="current_user">
+                    <input type="hidden" value="" name="friendUser"  id="friendUser">
                     <div class="form-group aggree" style="display: none;">
-                        <button class="btn btn-xs btn-primary"> 接受请求</button>
+                        <button class="btn btn-xs btn-primary"  onclick="aggree_request();"> 接受请求</button>
                     </div>
-                    <div class="form-group">
-                        <textarea id="refuse_reson"  class="form-control reason" style="display: none;" ></textarea>
-                        <button type="button" class="btn  btn-primary btn-sm refuse_reason" data-dismiss="modal">拒绝</button>
+                    <div class="reason form-group" style="display: none;">
+                        <textarea id="refuse_reson"  class="form-control"  ></textarea>
+                        <button type="button" class="btn  btn-primary btn-xs refuse_reason" data-dismiss="modal">拒绝</button>
                     </div>
                 </div>
             </div>
