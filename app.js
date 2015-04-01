@@ -138,7 +138,6 @@ io.sockets.on("connection", function (socket) {
                 });
             }
             socket.emit("onlineuser", {data: onlinUser});
-
         } else if (onlinUser == undefined || onlinUser.length == 0) {
             onlinUser.push(data.username);
             socket.emit("onlineuser", {data: onlinUser});
@@ -175,24 +174,29 @@ io.sockets.on("connection", function (socket) {
             if(error) {
                 console.log("添加好友失败" + error);
             }
-            clients[data.friendUser].emit("user add message",relations);
+
+            setTimeout(function (){
+                clients[data.friendUser].emit("user add message",{message:data.username+"请求加您为好友",friendUser:data.friendUser,username:data.username});
+            },1000);
+
         });
     });
 
     //同意请求
     socket.on("aggree request",function (data){
         //console.log(data);
-       var  reason = null;
+        var  reason = null;
         users.updatRelations(data.username,data.friendUser,data.isrefuse,data.reason,function (error,result){
-            console.log("当前用户",data.username);
-            console.log("好友",data.friendUser);
-            console.log(result);
+            //todo
         });
     });
 
     //拒绝请求
     socket.on("refuse request",function (data){
-        //console.log(data);
+
+        users.updatRelations(data.username,data.friendUser,data.isrefuse,data.reason,function (error,result){
+            //todo
+        });
     });
 });
 
