@@ -377,7 +377,7 @@ User.updatRelations = function (username, friendUser, isrefuse, reason, callback
             if (isrefuse == 1) {
                 collection.update({"friendUser": friendUser, "username": username, "isconfirm": 0}, {
                     $set: {
-                        iscofirm: 1,
+                        isconfirm: 1,
                         is_refuse: 1
                     }
                 }, function (error, ischanged) {
@@ -390,7 +390,7 @@ User.updatRelations = function (username, friendUser, isrefuse, reason, callback
                     }
                     collection.update({"friendUser": username, "username": friendUser, "isconfirm": 0}, {
                         $set: {
-                            iscofirm: 1,
+                            isconfirm: 1,
                             is_refuse: 1
                         }
                     }, function (error, ischanged) {

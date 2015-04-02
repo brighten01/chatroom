@@ -184,18 +184,18 @@ io.sockets.on("connection", function (socket) {
 
     //同意请求
     socket.on("aggree request",function (data){
-        //console.log(data);
         var  reason = null;
         users.updatRelations(data.username,data.friendUser,data.isrefuse,data.reason,function (error,result){
             //todo
+            clients[data.username].emit("friend list",{current_user : data.friendUser});
         });
     });
 
     //拒绝请求
     socket.on("refuse request",function (data){
-
         users.updatRelations(data.username,data.friendUser,data.isrefuse,data.reason,function (error,result){
             //todo
+            clients[data.username].emit("friend list",{current_user : data.friendUser});
         });
     });
 });

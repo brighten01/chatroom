@@ -16,6 +16,7 @@
         var room_id = "<%= room_id%>";
         var to_user ="";
         var html ="";
+        var  friend_message= [];
         var friend_list = "<%= friend_list%>";
         var username = "<% if (user){%><%= user.username%><%}else{ %> <% } %>";
         function createhtml(message) {
@@ -58,6 +59,7 @@
                 userhtml += ' </div>';
                 userhtml += ' </div>';
             } else {
+
 				userhtml += "<div style='margin-top: 30px;'><img src='"+message.avatar+"' width='50' style='float:right;margin-top:15px; margin-left: 10px;'>";
 				userhtml +='<div class="demo clearfix fr" style="margin-right: 15px;margin-top:-20px; ">';
 				userhtml+='<span class="triangle right">'+message.user+'</span>';
@@ -73,13 +75,7 @@
             }
         }
 
-        function createhtml2(messages) {
-            for (var i in messages) {
-                html += '<div class="list-group-item message"> ' +messages[i].user + ' : ' + messages[i].content;
-                html+= '</div>';
-                $(".messages").html(html);
-            }
-        }
+
 
         //  发送函数
         function send_message(){
@@ -138,20 +134,22 @@
             obj.remove();
             alert("已发送");
         }
-        //好友请求消息
-        socket.on("user add message",function (data){
 
+        //好友请求消息
+        socket.on("user add message",function (data) {
+            friend_message.push(data);
             var add_message = "<div  class='nav'>";
+            for(var i=0;i<friend_message.length;i++){
                 add_message  += "<ul style='list-style: none;' id='list_1'>";
                 add_message  += "<li>"+data.message+"</li>";
-                add_message  += "<li><label><input type=\"radio\" name=\"user_add\" class=\"accept\"  onclick=\"aggree('"+data.username+"','1')\">接受</label> " ;
-                add_message  += "<label><input type=\"radio\" name=\"user_add\" class=\"refuse\" onclick=\"refuse('"+data.username+"','1')\">拒绝</label></li>";
+                add_message  += "<li><label><input type=\"radio\" name=\"user_add\" class=\"accept\"  onclick=\"aggree('"+friend_message[i].username+"','"+i+"')\">接受</label> " ;
+                add_message  += "<label><input type=\"radio\" name=\"user_add\" class=\"refuse\" onclick=\"refuse('"+friend_message[i].username+"','"+i+"')\">拒绝</label></li>";
                 add_message  += "</ul>";
+            }
             add_message += "</div>";
             $(".friend_message").html(add_message);
-            var add_user_data = JSON.stringify(data);
             setTimeout(function () {
-                var add_user_message = "<a id=\"show_user_message\" onclick=\"show_message()\" style='cursor: pointer'>您有系统消息</a>";
+                var add_user_message = "<a id=\"show_user_message\" onclick=\"show_message()\" style='cursor: pointer'>好友请求</a>";
                 $(".user_message").html(add_user_message);
             }, 2000);
         });
@@ -160,7 +158,6 @@
         function show_message(){
            $("#add_friendlist").modal();
         }
-
 
         // 拒绝请求
         function refuse(username ,id){
@@ -185,22 +182,49 @@
         function aggree_request(){
             var username = $("#current_user").val();
             var friendUser = $("#friendUser").val();
-            socket.emit("aggree request",{username:username,friendUser:friendUser,isrefuse:0,reason:null});
-            //删除dom
             var remove_id = $("#current_id").val();
-            alert("发送成功");
+            socket.emit("aggree request",{username:username,friendUser:friendUser,isrefuse:0,reason:null,current_id: remove_id});
+            //删除dom
+             alert("发送成功");
             $("#"+remove_id).remove();
             $("#add_friendlist").modal('hide');
+            change_data(remove_id);
+            change_to_friend_list();
+        }
+        
+        //移动好友请求 目前只更新按钮状态
+        function change_to_friend_list(){
+
+            socket.on("friend list",function (data){
+                $('[data-user="'+data.current_user+'"]').remove();
+            });
         }
 
+        //更改数组
+        function change_data(remove_id) {
+            var change_id;
+            if (remove_id == 0) {
+                change_id = 0;
+            } else {
+                change_id = parseInt(remove_id) - 1;
+            }
+            if (friend_message.length > 0) {
+                friend_message.splice(change_id, 1);
+            }
+        }
+
+        //拒绝请求
         function refuse_request(){
             var username = $("#current_user").val();
             var friendUser = $("#friendUser").val();
-            socket.emit("refuse request",{username:username,friendUser:friendUser,isrefuse:1,reason:null});
             var remove_id = $("#current_id").val();
+            socket.emit("refuse request",{username:username,friendUser:friendUser,isrefuse:1,reason:null,current_id:remove_id});
+
             alert("发送成功");
             $("#"+remove_id).remove();
             $("#add_friendlist").modal('hide');
+            change_data(remove_id);
+            change_to_friend_list();
         }
         var ctrlDown = false;
         var messages;
@@ -306,8 +330,9 @@
             //登录房间
             socket.emit("setroom", {room_id: room_id});
 
+            //所有消息
             socket.on('allMessages', function (messages) {
-                createhtml2(messages);
+
             });
 
             $("#logout").click(function () {
